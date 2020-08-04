@@ -23,16 +23,16 @@ Set comma (for european models):
 
 ### QT/GTK
 
-* Option 1
+> Option 1
 
-> file: /etc/profile
+*  file: /etc/profile
 
     export QT_QPA_PLATFORMTHEME=gtk2
 
-* Option 2
+> Option 2
 
-> Install Qt5 Configuration Utility
+* Install Qt5 Configuration Utility
 
-> file: /etc/profile
+* file: /etc/profile
 
     export QT_QPA_PLATFORMTHEME=qt5ct
