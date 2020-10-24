@@ -389,6 +389,28 @@ ___
 * for Virtualbox
 `   pacman -S virtualbox-guest-utils xf86-video-vmware`
 
+4. OpenCL
+
+* AMD
+
+`   pacman -S clinfo ocl-icd opencl-mesa`
+
+* NVIDIA
+
+`   pacman -S clinfo ocl-icd opencl-nvidia`
+
+* Intel
+
+Broadwell+
+`   pacman -S clinfo ocl-icd intel-compute-runtime`
+
+Legacy
+`   pacman -S clinfo ocl-icd intel-opencl-runtime`
+
+
+* ALL: force ocl-icd loader
+
+`   echo "/usr/lib" > /etc/ld.so.conf.d/00-usrlib.conf`
 
 
 ### DM & DE
