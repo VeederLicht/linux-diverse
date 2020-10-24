@@ -1,10 +1,16 @@
 # Linux Tools
 
+
+## enfuse
+
+`enfuse <OPTIONS> <INPUT> -o <OUTPUT>`
+
+NOTE: does NOT copy EXIF data
+
+
 ## gmic
 
 `gmic <INPUT> -blend <TYPE> -o <OUTPUT>`
-
-NOTE: does NOT copy EXIF data
 
 
 ## imagemagick
