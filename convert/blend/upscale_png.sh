@@ -1,9 +1,9 @@
 #!/bin/bash
 
 clear
-echo -e "\e[2m  ============================================================================================"
-echo -e "\e[2m      An image batch upscale script using different tools, RickOrchard 2020, no copyright"
-echo -e "\e[2m  ---------------------------------------v1.03------------------------------------------------"
+echo -e "\e[2m  ==============================================================================================="
+echo -e "\e[2m      An image batch-upscale-&-merge script using different tools, RickOrchard 2020, no copyright"
+echo -e "\e[2m  -----------------------------------------v1.05-------------------------------------------------"
 echo -e "\n\n"
 
 mkdir -p ./upscaled
@@ -12,19 +12,24 @@ mkdir -p ./blended
 for f in *.png
 do
 
-	## Select one of the 2 upscaling methods below, or both for even better detail
+	## Uncomment one or more of the upscaling methods below
 
-	## 1. IMAGEMAGICK, convert point generates the most detail but is better used with exposure blends because of pixelated appearance
+	## 1. IMAGEMAGICK, convert point generates the most detail but is better used with many exposure blends because of pixelated appearance
+#		echo -e "\n"
+#		echo -e -n "\e[0m »»» Upscaling using convert: \e[1m $f... \e[2m"
+#		time convert "$f" -filter point -resize "200%" "PNG24:./upscaled/${f}.up_convert_point.png"
+
+
+	## 2. XBRZSCALE, enhanced edge upscaling
+#		echo -e "\n"
+#		echo -e "\e[0m »»» Upscaling using xbrzscale: \e[1m $f... \e[2m"
+#		time xbrzscale 2 "$f" "./upscaled/${f}.up_xbrzscale.png"
+
+
+	## 3. WAIFU2X, best overall (by far!)
 		echo -e "\n"
-		echo -e -n "\e[0m »»» Upscaling using convert: \e[1m $f... \e[2m"
-		time convert "$f" -filter point -resize "300%" "PNG24:./upscaled/${f}.up_convert_point.png"
-
-
-	## 2. XBRZSCALE, best for non-stacked images
-		echo -e "\n"
-		echo -e "\e[0m »»» Upscaling using xbrzscale: \e[1m $f... \e[2m"
-		time xbrzscale 3 "$f" "./upscaled/${f}.up_xbrzscale.png"
-
+		echo -e "\e[0m »»» Upscaling using waifu2x: \e[1m $f... \e[2m"
+		time waifu2x-ncnn-vulkan -i "$f" -o "./upscaled/${f}.up_waifu2x.png"
 
 	#if [[ $1 == "--rename" ]]
 	#  then
@@ -52,21 +57,11 @@ done
 	exiv2 rm "./blended/${f}#enfused.jpg"
 	exiv2 -ea- "$f" | exiv2 -ia- "./blended/${f}#enfused.jpg"
 	if [ $? -eq 0 ]
+	then
 		exiv2 -r':basename:_exif' "./blended/${f}#enfused.jpg"
 	fi
 	
 #rm -Rf "./upscaled/*"
 
-echo -e "\n\n\n  \e[93m Finished!\e[0m \n\n\n"
-echo "\n"
-echo -e "\e[0m »»» Blending multiple exposures using enfuse... \e[2m"
-time enfuse --output="./blended/blend_enfuse-${f}.jpg" --compression=100 ./upscaled/*.png --verbose=0
-#time enfuse --output="./blended/blend_enfuse-${f}.png" ./upscaled/*.png
-
-echo "\n"
-echo -e "\e[0m »»» Copying EXIF data to the new file... \e[2m"
-exiv2 rm "./blended/blend_enfuse-${f}.jpg"
-exiv2 -ea- "$f" | exiv2 -ia- "./blended/blend_enfuse-${f}.jpg"
-#rm -Rf "./upscaled/*"
 
 echo -e "\n\n\n  \e[4mFinished!\e[0m \n\n\n"
