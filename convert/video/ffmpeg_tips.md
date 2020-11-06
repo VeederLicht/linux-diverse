@@ -18,3 +18,6 @@
 
 ### Get framerate (for use in scripts etc)
 `ffmpeg -i VTS_04_1.VOB 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p"`
+
+### Convert to DNxHR (_lb, _sq, _hq, _hqx, _444)
+`ffmpeg -i "inputvideo.mp4" -c:v dnxhd  -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le "outputvideo.mxf"`
