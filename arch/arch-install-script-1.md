@@ -1,6 +1,6 @@
 # INSTALL ARCH
 
-v.2020.07.29
+v.2020.11.15
 
 
 Compiled from:
@@ -116,9 +116,11 @@ or
 `   mkfs.btrfs /dev/<PARTn)`
 
 
-* Mount bootpartition
+* Mount root- & bootpartition
 
 `   mount /dev/<PARTn> /mnt`
+
+`   mount /dev/<PART0> /mnt/boot`
 
 * Show mounts
 
@@ -286,7 +288,22 @@ edit sudo-file (using special commando)
 
 ___
 
-## STAP 15: GRUB
+## STAP 15A: SYSTEMD-BOOT
+
+1. Install
+
+`   bootctl install`
+
+2. Configure /boot/loader/loader.conf
+
+3. Add /boot/loader/entries/*.conf
+
+4. Check
+
+`   bootctl status`
+___
+
+## STAP 15B: GRUB
 
 1. download
 
@@ -383,7 +400,7 @@ ___
 
 (proprietary)
 
-`   pacman -S nvidia-lts nvidia-utils lib32-nvidia-utils`
+`   pacman -S nvidia-lts nvidia-utils`
 
 
 * for Virtualbox
