@@ -21,3 +21,9 @@
 
 ### Convert to DNxHR (_lb, _sq, _hq, _hqx, _444)
 `ffmpeg -i "inputvideo.mp4" -c:v dnxhd  -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le "outputvideo.mxf"`
+
+### Convert VHS/DVD to H264, correcting aspect for Double8 8mm video format, also applying deinterlacing
+`ffmpeg -i VTS_01_4.VOB -vf yadif,scale=784x576,setdar=dar=1.361 -map 0:v -c:v libx264 -preset slow -crf 20 -map 0:a -c:a copy out.mkv`
+
+### Convert VHS/DVD to H264, correcting aspect for Super 8mm video format, also applying deinterlacing
+`ffmpeg -i VTS_01_4.VOB -vf yadif,scale=830x576,setdar=dar=1.441 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
