@@ -3,11 +3,11 @@
 ### Extract image sequence, starting from 4min16, length 1 sec., jpg quality 3 (1-32)
 `ffmpeg -ss 00:04:16 -t 1 -i input.mp4 -qscale:v 3 out_%06d.jpg`
 
-### Extract image sequence, using cuda, deinterlace (bwdif is much better then yadif!),rescale & set display aspect ratio
-`ffmpeg -y -init_hw_device cuda=gtx:0 -i input.mp4 -filter_hw_device gtx -vf bwdif,scale=784x576,setdar=dar=1.361 -qscale:v 1 out_%06d.jpg`
+### Extract image sequence, using cuda, deinterlace (yadif is more consistent then bwdif),rescale & set display aspect ratio
+`ffmpeg -y -init_hw_device cuda=gtx:0 -i input.mp4 -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -qscale:v 1 out_%06d.jpg`
 
 ### Extract image sequence, ..., +filters removegrain/grayscale/normalize/yuv420p, export to webp (efficient!!)
-`ffmpeg -y -i input.mp4 -vf bwdif,scale=784x576,setdar=dar=1.361,removegrain=4:4:4:4,unsharp=11:11:0.4:5:5:0.0,eq=saturation=0,normalize=blackpt=black:whitept=white:smoothing=0,format=yuv420p -q:v 90 out_%06d.webp`
+`ffmpeg -y -i input.mp4 -vf yadif,scale=784x576,setdar=dar=1.361,removegrain=4:4:4:4,unsharp=11:11:0.4:5:5:0.0,eq=saturation=0,normalize=blackpt=black:whitept=white:smoothing=0,format=yuv420p -q:v 90 out_%06d.webp`
 
 ### Extract audio (mka is most universal container, see ffmpeg site), probe audio type with 'ffprobe'
 `ffmpeg -i VTS_04_1.VOB -vn -acodec copy output-audio.mka`
@@ -38,3 +38,15 @@
 
 ### Convert VHS/DVD to H264, correcting aspect for Super 8mm video format, also applying deinterlacing
 `ffmpeg -i VTS_01_4.VOB -vf yadif,scale=830x576,setdar=dar=1.441 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
+
+
+## FOOTNOTES
+Het blijkt dat het toepassen van ffmpeg-filters vóór het toepassen van DeepAI colorization een effect heeft op de resulterende kleuren.
+
+Moraal, eerst uitpakken:
+
+1. ffmpeg -y -i mp4_0011.jpg -vf yadif,scale=784x576,setdar=dar=1.361,format=yuv420p -q:v 90 mp4_0011-vfilters.webp
+
+2. naar DeepAI
+
+3. evt. overige filters; removegrain=4:4:4:4,unsharp=11:11:0.4:5:5:0.0,normalize=blackpt=black:whitept=white:smoothing=0(,format=yuv420p)
