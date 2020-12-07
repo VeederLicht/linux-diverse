@@ -1,8 +1,19 @@
+## EXTRACT
+
 ### Extract image sequence, starting from 4min16, length 1 sec., jpg quality 3 (1-32)
-`ffmpeg -ss 00:04:16 -t 1 -i output.mp4 -qscale:v 3 mp4_%03d.jpg`
+`ffmpeg -ss 00:04:16 -t 1 -i input.mp4 -qscale:v 3 out_%03d.jpg`
 
 ### Extract image sequence, using cuda, rescale & display aspect ratio
-`ffmpeg -y -init_hw_device cuda=gtx:0 -i VTS_01_4.VOB -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -qscale:v 1 ./VTS_01_4.VOB.dir/exp_%06d.jpg`
+`ffmpeg -y -init_hw_device cuda=gtx:0 -i input.mp4 -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -qscale:v 1 ./input.mp4.dir/out_%06d.jpg`
+
+### Extract image sequence, ..., filters removegrain/grayscale/normalize, export to webp (efficient!!)
+`ffmpeg -y -i input.mp4 -vf removegrain=4:4:4:4,unsharp=11:11:0.4:5:5:0.0,eq=saturation=0,normalize=blackpt=black:whitept=white:smoothing=0 -q:v 99 out_%06d.webp`
+
+### Extract audio (mka is most universal container, see ffmpeg site), probe audio type with 'ffprobe'
+`ffmpeg -i VTS_04_1.VOB -vn -acodec copy output-audio.mka`
+
+
+## CONVERT
 
 ### Convert input.vob to output.mp4 using de-interlacing (yadif/yadif_cuda), converting the audio to 256k AAC
 `ffmpeg -i input.VOB -vf yadif -c:v libx264 -preset slow -crf 19 -c:a aac -b:a 256k output.mp4`
@@ -12,9 +23,6 @@
 
 ### Convert input.mp4 to output.mp4 with H.265 video (standard audio settings)
 `ffmpeg -y -init_hw_device cuda=gtx:0 -i VTS_01_4.VOB -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -c:v hevc_nvenc output.mp4`
-
-### Extract audio (mka is most universal container, see ffmpeg site), probe audio type with 'ffprobe'
-`ffmpeg -i VTS_04_1.VOB -vn -acodec copy output-audio.mka`
 
 ### Combine images & audio to new video file
 `ffmpeg -r 25 -i frames/frame_%04d.png -i "Bonobo - Kong.mp3" -c:v libx264 -c:a copy -crf 20 -r 25 -shortest -y video-from-frames.mp`
