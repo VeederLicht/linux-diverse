@@ -12,12 +12,15 @@
 ### Extract audio (mka is most universal container, see ffmpeg site), probe audio type with 'ffprobe'
 `ffmpeg -i VTS_04_1.VOB -vn -acodec copy output-audio.mka`
 
+<br>
+<br>
 
 ## CONVERT
 
 ### To apply letterbox/pillarbox, scaling to 1280x720
 `ffmpeg -i input -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:-1:-1:color=black" output.mp4`
 https://superuser.com/questions/547296/resizing-videos-with-ffmpeg-avconv-to-fit-into-static-sized-player
+https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 
 ### Convert input.vob to output.mp4 using de-interlacing (yadif/yadif_cuda), converting the audio to 256k AAC
 `ffmpeg -i input.VOB -vf yadif -c:v libx264 -preset slow -crf 19 -c:a aac -b:a 256k output.mp4`
@@ -43,6 +46,8 @@ https://superuser.com/questions/547296/resizing-videos-with-ffmpeg-avconv-to-fit
 ### Convert VHS/DVD to H264, correcting aspect for Super 8mm video format, also applying deinterlacing
 `ffmpeg -i VTS_01_4.VOB -vf yadif,scale=830x576,setdar=dar=1.441 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
 
+<br>
+<br>
 
 ## USING MIDDLEWARE
 It appears that applying ffmpeg-filters *before* colorization processes will influence the resulting colors. Also, currently many AI restoration tools can only handle sub 900K pixel images relyably.
