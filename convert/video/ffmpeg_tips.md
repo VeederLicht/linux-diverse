@@ -1,19 +1,23 @@
 ## EXTRACT
 
 ### Extract image sequence, starting from 4min16, length 1 sec., jpg quality 3 (1-32)
-`ffmpeg -ss 00:04:16 -t 1 -i input.mp4 -qscale:v 3 out_%06d.jpg`
+`ffmpeg -ss 00:04:16 -t 1 -i input.mp4 -qscale:v 3 out_%05d.jpg`
 
 ### Extract image sequence, using cuda, deinterlace (yadif is more consistent then bwdif),rescale & set display aspect ratio
-`ffmpeg -y -init_hw_device cuda=gtx:0 -i input.mp4 -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -qscale:v 1 out_%06d.jpg`
+`ffmpeg -y -init_hw_device cuda=gtx:0 -i input.mp4 -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -qscale:v 1 out_%05d.jpg`
 
 ### Extract image sequence, ..., +filters removegrain/grayscale/normalize/yuv420p, export to webp (efficient!!)
-`ffmpeg -y -i input.mp4 -vf yadif,scale=784x576,setdar=dar=1.361,removegrain=4:4:4:4,unsharp=11:11:0.4:5:5:0.0,eq=saturation=0,normalize=blackpt=black:whitept=white:smoothing=0,format=yuv420p -q:v 90 out_%06d.webp`
+`ffmpeg -y -i input.mp4 -vf yadif,scale=784x576,setdar=dar=1.361,removegrain=4:4:4:4,unsharp=11:11:0.4:5:5:0.0,eq=saturation=0,normalize=blackpt=black:whitept=white:smoothing=0,format=yuv420p -q:v 90 out_%05d.webp`
 
 ### Extract audio (mka is most universal container, see ffmpeg site), probe audio type with 'ffprobe'
 `ffmpeg -i VTS_04_1.VOB -vn -acodec copy output-audio.mka`
 
 
 ## CONVERT
+
+### To apply letterbox/pillarbox, scaling to 1280x720
+`ffmpeg -i input -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:-1:-1:color=black" output.mp4`
+https://superuser.com/questions/547296/resizing-videos-with-ffmpeg-avconv-to-fit-into-static-sized-player
 
 ### Convert input.vob to output.mp4 using de-interlacing (yadif/yadif_cuda), converting the audio to 256k AAC
 `ffmpeg -i input.VOB -vf yadif -c:v libx264 -preset slow -crf 19 -c:a aac -b:a 256k output.mp4`
@@ -40,13 +44,30 @@
 `ffmpeg -i VTS_01_4.VOB -vf yadif,scale=830x576,setdar=dar=1.441 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
 
 
-## FOOTNOTES
-Het blijkt dat het toepassen van ffmpeg-filters vóór het toepassen van DeepAI colorization een effect heeft op de resulterende kleuren.
+## USING MIDDLEWARE
+It appears that applying ffmpeg-filters *before* colorization processes will influence the resulting colors. Also, currently many AI restoration tools can only handle sub 900K pixel images relyably.
 
-Moraal, eerst uitpakken:
+Solution:
 
-1. ffmpeg -y -i mp4_0011.jpg -vf yadif,scale=784x576,setdar=dar=1.361,format=yuv420p -q:v 90 mp4_0011-vfilters.webp
+1. Extract images (do interlace!, interlaced images color pourly):
+`ffmpeg -y -i input.mp4 -vf yadif,format=yuv420p -q:v 90 out_%05d.jpg.webp`
 
-2. naar DeepAI
+2. naar DeepAI / BOPBTL
 
-3. evt. overige filters; removegrain=4:4:4:4,unsharp=11:11:0.4:5:5:0.0,normalize=blackpt=black:whitept=white:smoothing=0(,format=yuv420p)
+3. Apply other effects:
+```
+ffmpeg -y -i ai_out.jpg -vf \
+                                 scale=784x576 \
+                                 ,setdar=dar=1.361 \
+                                 ,removegrain=4:4:4:4 \
+                                 ,unsharp=11:11:0.4:5:5:0.0 \
+                                 ,normalize=blackpt=black:whitept=white:smoothing=0 \
+                                 ,format=yuv420p \
+                                 -q:v 90 mp4_0011-vfilters.webp
+```
+
+## TIPS
+
+  * MKV container is probably the most versatile container. Contains practically any type of audio+video codec
+  * MKA like above
+  * Editable formats for non-linear video editors are ProRes, DNXHD and DNXHQ
