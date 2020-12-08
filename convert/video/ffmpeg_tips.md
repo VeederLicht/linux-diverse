@@ -49,6 +49,16 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 <br>
 <br>
 
+## INFO
+
+### Count number of frames
+```
+ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 input.mp4
+```
+
+<br>
+<br>
+
 ## USING MIDDLEWARE
 It appears that applying ffmpeg-filters *before* colorization processes will influence the resulting colors. Also, currently many AI restoration tools can only handle sub 900K pixel images relyably.
 
