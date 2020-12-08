@@ -50,7 +50,9 @@ It appears that applying ffmpeg-filters *before* colorization processes will inf
 Solution:
 
 1. Extract images (do interlace!, interlaced images color pourly):
-`ffmpeg -y -i input.mp4 -vf yadif,format=yuv420p -q:v 90 out_%05d.jpg.webp`
+```
+ffmpeg -y -i input.mp4 -vf yadif,format=yuv420p -q:v 90 out_%05d.jpg.webp
+```
 
 2. naar DeepAI / BOPBTL
 
