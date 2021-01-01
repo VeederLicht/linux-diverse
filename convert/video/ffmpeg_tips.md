@@ -30,6 +30,8 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 
 ### Convert input.mp4 to output.mp4 with H.265 video (standard audio settings)
 `ffmpeg -y -init_hw_device cuda=gtx:0 -i VTS_01_4.VOB -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -c:v hevc_nvenc output.mp4`
+#### Using NVIDIA, denoising+sharpening, constant quality, high profile, slow preset
+`ffmpeg -i input.mp4 -init_hw_device cuda=gtx:0 -filter_hw_device gtx -vf removegrain=2:2:2:2,unsharp=5:5:0.7:3:3:0.4 -c:v hevc_nvenc -preset slow -rc:v vbr_hq -cq:v 28 -c:a copy output.mp4`
 
 ### Combine images & audio to new video file
 `ffmpeg -r 25 -i frames/frame_%04d.png -i "Bonobo - Kong.mp3" -c:v libx264 -c:a copy -crf 20 -r 25 -shortest -y video-from-frames.mp`
@@ -38,7 +40,7 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 `ffmpeg -i VTS_04_1.VOB 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p"`
 
 ### Convert to DNxHR (_lb, _sq, _hq, _hqx, _444)
-`ffmpeg -i "inputvideo.mp4" -c:v dnxhd  -profile:v dnxhr_hq -pix_fmt yuv422p -c:a pcm_s16le "outputvideo.mxf"`
+`ffmpeg -i input.mts -vf format=yuv422p -c:v dnxhd -b:v 90M -c:a pcm_s16le output.mxf`
 
 ### Convert VHS/DVD to H264, correcting aspect for Double8 8mm video format, also applying deinterlacing
 `ffmpeg -i VTS_01_4.VOB -vf yadif,scale=784x576,setdar=dar=1.361 -map 0:v -c:v libx264 -preset slow -crf 20 -map 0:a -c:a copy out.mkv`
