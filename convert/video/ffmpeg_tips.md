@@ -7,10 +7,16 @@
 `ffmpeg -y -init_hw_device cuda=gtx:0 -i input.mp4 -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -qscale:v 1 out_%05d.jpg`
 
 ### Extract image sequence, ..., +filters removegrain/grayscale/normalize/yuv420p, export to webp (efficient!!)
-`ffmpeg -y -i input.mp4 -vf yadif,scale=784x576,setdar=dar=1.361,removegrain=4:4:4:4,unsharp=11:11:0.4:5:5:0.0,eq=saturation=0,normalize=blackpt=black:whitept=white:smoothing=0,format=yuv420p -q:v 90 out_%05d.webp`
+`ffmpeg -y -i input.mp4 -vf yadif,scale=784x576,setdar=dar=1.361,removegrain=4:4:4:4,unsharp=5:5:0.5,eq=saturation=0,normalize=blackpt=black:whitept=white:smoothing=0,format=yuv420p -q:v 90 out_%05d.webp`
 
 ### Extract audio (mka is most universal container, see ffmpeg site), probe audio type with 'ffprobe'
-`ffmpeg -i VTS_04_1.VOB -vn -acodec copy output-audio.mka`
+`ffmpeg -i input.mp4 -vn -acodec copy output-audio.mka`
+
+### Denoise pour audio ('middle-pass', 200-3000Hz)
+`ffmpeg -i input.mp4 ... -af highpass=f=200,lowpass=f=3000 -c:a aac -b:a 96k output.mka`
+
+### Denoise images (1.5 seems to be the maximum reasonable sharpening strength)
+`ffmpeg -i input.png -vf unsharp=3:3:1.5,bm3d=sigma=8:bstep=12:mstep=8:group=1:estim=basic,atadenoise test1_bm3d_2.png
 
 <br>
 <br>
@@ -61,7 +67,7 @@ ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_
 <br>
 <br>
 
-## USING MIDDLEWARE
+## USING FFMPEG AS MIDDLEWARE
 It appears that applying ffmpeg-filters *before* colorization processes will influence the resulting colors. Also, currently many AI restoration tools can only handle sub 900K pixel images relyably.
 
 Solution:
