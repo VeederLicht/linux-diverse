@@ -42,6 +42,9 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 ### Scale using CUDA
 `-vf ...,hwupload_cuda,scale_cuda=w=-2:h=1080,hwdownload,...`
 
+### Export to JPEG-2000 frames
+`-vf removegrain=2:2:2:2,unsharp=5:5:1.2,bm3d=sigma=6:bstep=12:mstep=8:group=1:estim=basic,scale -c:v libopenjpeg -q:v 2 out.jp2`
+
 ### Combine images & audio to new video file
 `ffmpeg -r 25 -i frames/frame_%04d.png -i "Bonobo - Kong.mp3" -c:v libx264 -c:a copy -crf 20 -r 25 -shortest -y video-from-frames.mp`
 
@@ -63,10 +66,13 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 ## INFO
 
 ### Count number of frames
-```
-ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 input.mp4
-```
+`ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 input.mp4`
 
+### List supported filters / codecs
+```
+ffmpeg -filters | grep ...
+ffmpeg -codecs | grep ...
+```
 <br>
 <br>
 
