@@ -39,6 +39,9 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 #### Using NVIDIA, denoising+sharpening, constant quality, high profile, slow preset
 `ffmpeg -i input.mp4 -init_hw_device cuda=gtx:0 -filter_hw_device gtx -vf removegrain=2:2:2:2,unsharp=5:5:0.7:3:3:0.4 -c:v hevc_nvenc -preset slow -rc:v vbr_hq -cq:v 28 -c:a copy output.mp4`
 
+### Scale using CUDA
+`-vf ...,hwupload_cuda,scale_cuda=w=-2:h=1080,hwdownload,...`
+
 ### Combine images & audio to new video file
 `ffmpeg -r 25 -i frames/frame_%04d.png -i "Bonobo - Kong.mp3" -c:v libx264 -c:a copy -crf 20 -r 25 -shortest -y video-from-frames.mp`
 
