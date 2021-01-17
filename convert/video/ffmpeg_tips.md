@@ -61,7 +61,8 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 `ffmpeg -i VTS_01_4.VOB -vf yadif,scale=830x576,setdar=dar=1.441 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
 
 ### Convert VHS to 16/10, pixel aspect ratio 1/1, deinterlace, crop, deblock (pp7),denoise, sharpen, audio crystalizer
-`ffmpeg -i IN.VOB -init_hw_device cuda=gtx:0 -filter_hw_device gtx -vf hwupload_cuda,yadif_cuda,scale_cuda=w=1075:h=756,hwdownload,crop=1024:640,setdar=dar=16/10,setsar=sar=1/1 -af crystalizer -c:v hevc_nvenc -preset slow -cbr true -b:v 3M -c:a aac -b:a 196k OUT.mp4`
+`ffmpeg INPUT.mp4 -init_hw_device cuda=gtx:0 -filter_hw_device gtx -vf hwupload_cuda,yadif_cuda,scale_cuda=w=1075:h=756,hwdownload,pp7=4,crop=1024:640,setdar=dar=4/3,setsar=sar=1/1,bm3d=sigma=6:bstep=12:mstep=8:group=1:estim=basic,unsharp=3:3:1 -af crystalizer -c:v hevc_nvenc -preset slow -cbr true -b:v 3M -c:a aac -b:a 196k OUTPUT.mp4
+`
 
 <br>
 <br>
