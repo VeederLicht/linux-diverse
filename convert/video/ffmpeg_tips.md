@@ -61,24 +61,28 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 ### Convert Super 8mm to H264, correcting aspect also applying deinterlacing
 `-vf bwdif,scale=830x576,setdar=dar=1.441`
 
-### Convert VHS to 16/10, pixel aspect ratio 1/1, deinterlace, crop, deblock (pp7),denoise, sharpen
+### Preprocess, deinterlace using cuda
+`-init_hw_device cuda=gtx:0 -filter_hw_device gtx -vf hwupload_cuda,yadif_cuda,hwdownload,...`
+
+###  Preprocess output, relying on H264 deblocking (might destroy details)
+`-c:v h264_nvenc -preset:v slow -2pass true -profile:v high -rc vbr_hq -c:a aac -b:a 256k OUTPUT.mp4`
+
+### Postprocess, scale using lanczos
+`-vf scale=w=960:h=720:sws_flags=lanczos,setdar=dar=4/3,setsar=sar=1/1 -af crystalizer`
+
+### Postproces, VHS to 16/10, pixel aspect ratio 1/1, crop, deblock (pp7),denoise, sharpen
 ```
 -init_hw_device cuda=gtx:0 -filter_hw_device gtx \
   -vf hwupload_cuda,yadif_cuda,scale_cuda=w=1075:h=756,hwdownload \
   ,pp7=4,crop=1024:640,setdar=dar=4/3,setsar=sar=1/1 \
-  ,bm3d=sigma=6:bstep=12:mstep=8:group=1:estim=basic,unsharp=3:3:1
+  ,bm3d=sigma=6:bstep=12:mstep=8:group=1:estim=basic,unsharp=3:3:1 \
+  -af crystalizer
 ```
 
-### Convert/preproces VHS deinterlace (bwdiff), scaling, audio crystalizer
-`-vf bwdif,scale=w=960:h=720:sws_flags=lanczos,setdar=dar=4/3,setsar=sar=1/1 -af crystalizer`
-
-###  relying on H264 deblocking, useable for preprocessing
-`-c:v h264_nvenc -preset:v slow -2pass true -profile:v high -rc vbr_hq -c:a aac -b:a 256k OUTPUT.mp4`
-
-### final output VHS with heavy smoothing
+### Postprocess output VHS with heavy smoothing
 `-vf pp7=4,unsharp=5:5:1 -c:v hevc_nvenc -preset slow -cbr true -b:v 1.5M -c:a aac -b:a 196k`
 
-### final output, merge 2 streams
+### Postprocess output, merge 2 streams
 `ffmpeg -i INPUT.mp4 -i INPUT.mp3 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
 
 <br>
