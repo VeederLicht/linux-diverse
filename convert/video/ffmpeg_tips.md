@@ -75,8 +75,8 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 ###  relying on H264 deblocking, useable for preprocessing
 `-c:v h264_nvenc -preset:v slow -2pass true -profile:v high -rc vbr_hq -c:a aac -b:a 256k OUTPUT.mp4`
 
-### final output H265 with constant bitrate
-` -c:v hevc_nvenc -preset slow -cbr true -b:v 3M -c:a aac -b:a 196k OUTPUT.mp4`
+### final output VHS with heavy smoothing
+`-vf pp7=4,unsharp=5:5:1 -c:v hevc_nvenc -preset slow -cbr true -b:v 1.5M -c:a aac -b:a 196k`
 
 ### final output, merge 2 streams
 `ffmpeg -i INPUT.mp4 -i INPUT.mp3 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
