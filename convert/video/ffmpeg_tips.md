@@ -16,7 +16,7 @@
 `ffmpeg -i input.mp4 ... -af highpass=f=200,lowpass=f=3000 -c:a aac -b:a 96k output.mka`
 
 ### Denoise images (1.5 seems to be the maximum reasonable sharpening strength)
-`ffmpeg -i input.png -vf unsharp=3:3:1.5,bm3d=sigma=8:bstep=12:mstep=8:group=1:estim=basic,atadenoise test1_bm3d_2.png
+`ffmpeg -i input.png -vf unsharp=3:3:1.5,bm3d=sigma=8:bstep=12:mstep=8:group=1:estim=basic,atadenoise test1_bm3d_2.png`
 
 <br>
 <br>
@@ -36,6 +36,7 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 
 ### Convert input.mp4 to output.mp4 with H.265 video (standard audio settings)
 `ffmpeg -y -init_hw_device cuda=gtx:0 -i VTS_01_4.VOB -filter_hw_device gtx -vf yadif,scale=784x576,setdar=dar=1.361 -c:v hevc_nvenc output.mp4`
+
 #### Using NVIDIA, denoising+sharpening, constant quality, high profile, slow preset
 `ffmpeg -i input.mp4 -init_hw_device cuda=gtx:0 -filter_hw_device gtx -vf removegrain=2:2:2:2,unsharp=5:5:0.7:3:3:0.4 -c:v hevc_nvenc -preset slow -rc:v vbr_hq -cq:v 28 -c:a copy output.mp4`
 
@@ -52,17 +53,33 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 `ffmpeg -i VTS_04_1.VOB 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p"`
 
 ### Convert to DNxHR (_lb, _sq, _hq, _hqx, _444)
-`ffmpeg -i input.mts -vf format=yuv422p -c:v dnxhd -b:v 90M -c:a pcm_s16le output.mxf`
+`ffmpeg -i input.mts -vf format=yuv422p,... -c:v dnxhd -b:v 90M -c:a pcm_s16le output.mxf`
 
-### Convert VHS/DVD to H264, correcting aspect for Double8 8mm video format, also applying deinterlacing
-`ffmpeg -i VTS_01_4.VOB -vf yadif,scale=784x576,setdar=dar=1.361 -map 0:v -c:v libx264 -preset slow -crf 20 -map 0:a -c:a copy out.mkv`
+### Convert Double8 8mm to H264, correcting aspect also applying deinterlacing
+`-vf bwdif,scale=784x576,setdar=dar=1.361`
 
-### Convert VHS/DVD to H264, correcting aspect for Super 8mm video format, also applying deinterlacing
-`ffmpeg -i VTS_01_4.VOB -vf yadif,scale=830x576,setdar=dar=1.441 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
+### Convert Super 8mm to H264, correcting aspect also applying deinterlacing
+`-vf bwdif,scale=830x576,setdar=dar=1.441`
 
-### Convert VHS to 16/10, pixel aspect ratio 1/1, deinterlace, crop, deblock (pp7),denoise, sharpen, audio crystalizer
-`ffmpeg INPUT.mp4 -init_hw_device cuda=gtx:0 -filter_hw_device gtx -vf hwupload_cuda,yadif_cuda,scale_cuda=w=1075:h=756,hwdownload,pp7=4,crop=1024:640,setdar=dar=4/3,setsar=sar=1/1,bm3d=sigma=6:bstep=12:mstep=8:group=1:estim=basic,unsharp=3:3:1 -af crystalizer -c:v hevc_nvenc -preset slow -cbr true -b:v 3M -c:a aac -b:a 196k OUTPUT.mp4
-`
+### Convert VHS to 16/10, pixel aspect ratio 1/1, deinterlace, crop, deblock (pp7),denoise, sharpen
+```
+-init_hw_device cuda=gtx:0 -filter_hw_device gtx \
+  -vf hwupload_cuda,yadif_cuda,scale_cuda=w=1075:h=756,hwdownload \
+  ,pp7=4,crop=1024:640,setdar=dar=4/3,setsar=sar=1/1 \
+  ,bm3d=sigma=6:bstep=12:mstep=8:group=1:estim=basic,unsharp=3:3:1
+```
+
+### Convert/preproces VHS deinterlace (bwdiff), scaling, audio crystalizer
+`-vf bwdif,scale=w=960:h=720:sws_flags=lanczos,setdar=dar=4/3,setsar=sar=1/1 -af crystalizer`
+
+###  relying on H264 deblocking, useable for preprocessing
+`-c:v h264_nvenc -preset:v slow -2pass true -profile:v high -rc vbr_hq -c:a aac -b:a 256k OUTPUT.mp4`
+
+### final output H265 with constant bitrate
+` -c:v hevc_nvenc -preset slow -cbr true -b:v 3M -c:a aac -b:a 196k OUTPUT.mp4`
+
+### final output, merge 2 streams
+`ffmpeg -i INPUT.mp4 -i INPUT.mp3 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
 
 <br>
 <br>
@@ -72,10 +89,11 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 ### Count number of frames
 `ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 input.mp4`
 
-### List supported filters / codecs
+### List supported filters / codecs / options ...
 ```
 ffmpeg -filters | grep ...
 ffmpeg -codecs | grep ...
+ffmpeg -h encoder=h264_nvenc
 ```
 <br>
 <br>
