@@ -44,7 +44,7 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 `-vf ...,hwupload_cuda,scale_cuda=w=-2:h=1080,hwdownload,...`
 
 ### Export to JPEG-2000 frames
-`-vf removegrain=2:2:2:2,unsharp=5:5:1.2,bm3d=sigma=6:bstep=12:mstep=8:group=1:estim=basic,scale -c:v libopenjpeg -q:v 2 out.jp2`
+` -c:v libopenjpeg -q:v 2 out.jp2`
 
 ### Combine images & audio to new video file
 `ffmpeg -r 25 -i frames/frame_%04d.png -i "Bonobo - Kong.mp3" -c:v libx264 -c:a copy -crf 20 -r 25 -shortest -y video-from-frames.mp`
@@ -55,20 +55,17 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 ### Convert to DNxHR (_lb, _sq, _hq, _hqx, _444)
 `ffmpeg -i input.mts -vf format=yuv422p,... -c:v dnxhd -b:v 90M -c:a pcm_s16le output.mxf`
 
-### Convert Double8 8mm to H264, correcting aspect also applying deinterlacing
-`-vf bwdif,scale=784x576,setdar=dar=1.361`
+### Prepocess using deinterlacing, scaling (this example 4:3 aspect), and deblocking (uspp is the best by far)
+`-vf format=yuv420p,yadif,uspp=2:2,scale=ih/3*4:ih:sws_flags=gauss,setsar=sar=1/1`
 
-### Convert Super 8mm to H264, correcting aspect also applying deinterlacing
-`-vf bwdif,scale=830x576,setdar=dar=1.441`
+### Edge preserving blur for blocky footage (negative smartblur actually sharpens)
+`-vf scale=-2:1080:sws_flags=gauss,yaepblur,smartblur=ls=-1`
 
 ### Preprocess, deinterlace using cuda
 `-init_hw_device cuda=gtx:0 -filter_hw_device gtx -vf hwupload_cuda,yadif_cuda,hwdownload,...`
 
-###  Preprocess output, relying on H264 deblocking (might destroy details)
+###  Preprocess output, relying on H264 deblocking
 `-c:v h264_nvenc -preset:v slow -2pass true -profile:v high -rc vbr_hq -c:a aac -b:a 256k OUTPUT.mp4`
-
-### Postprocess, scale using lanczos
-`-vf scale=w=960:h=720:sws_flags=lanczos,setdar=dar=4/3,setsar=sar=1/1 -af crystalizer`
 
 ### Postproces, VHS to 16/10, pixel aspect ratio 1/1, crop, deblock (pp7),denoise, sharpen
 ```
@@ -79,8 +76,8 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
   -af crystalizer
 ```
 
-### Postprocess output VHS with heavy smoothing
-`-vf pp7=4,unsharp=5:5:1 -c:v hevc_nvenc -preset slow -cbr true -b:v 1.5M -c:a aac -b:a 196k`
+### Encoding with fixed bitrate output VHS with heavy smoothing
+` -c:v hevc_nvenc -preset slow -cbr true -b:v 1.5M -c:a aac -b:a 196k`
 
 ### Postprocess output, merge 2 streams
 `ffmpeg -i INPUT.mp4 -i INPUT.mp3 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
