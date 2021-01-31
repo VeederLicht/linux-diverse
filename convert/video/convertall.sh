@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Define text styles
-sNo="\[\033[0m"
-sBo="\033[1;30m"
+sYe="\e[93m"
+sNo="\033[1;30m"
 
 
 # Show banner
-echo -e "\n ${sBo}"
+echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
 echo -e "       Batch convert old video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
-echo -e "  -------------------------------------------- v0.80 ----------------------------------------------------"
+echo -e "  --------------------------------------------${sYe} v0.91 ${sNo}----------------------------------------------------"
 echo -e ""
 
 # Test nr. of arguments
@@ -31,34 +31,28 @@ done
 
 	# ... select source format
 	echo -e "\n"
-	echo -e "     (a) Preprocess VHS:  720x576 to 768x576 (4/3)"
-	echo -e "     (e) Preprocess Super8: 720x576 (4/3) to 828x552 (3/2)"
-	echo -e "     (f) Preprocess Super8: 720x576 (16/9) to 810x540 (3/2)"
-	echo -e "     (i) Preprocess Double8: 720x576 (4/3) to 780x520 (3/2)"
+	echo -e "     (a) Preprocess to 4/3 (sar 1/1), no crop"
+	echo -e "     (e) Preprocess to 16/9 (sar 1/1), no crop"
+	echo -e "     (i) Preprocess to 16/9 (sar 1/1), crop to (3/2)"
 	echo -e "     (z) Postprocess/finalize (H265)"
-	echo -e "\e[1m"
+	echo -e ""
 	read -p "      Select profile: " answer1
-	echo -e "${sBo}"
+	echo -e ""
 
 	case $answer1 in
 	  "a")
-		arg1=",scale=768:576:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -crf 10 -c:a aac -b:a 256k"
-		arg2="[vhs]"
+		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
+		arg2="[4.3]"
 		arg3=""
 		;;
 	  "e")
-		arg1=",scale=830:576:sws_flags=lanczos,setsar=sar=1/1,crop=828:552 -c:v libx264 -preset:v slow -profile:v high -crf 10 -c:a aac -b:a 256k"
-		arg2="[sup8]"
-		arg3=""
-		;;
-	  "f")
-		arg1=",scale=1024:576:sws_flags=lanczos,setsar=sar=1/1,crop=810:540 -c:v libx264 -preset:v slow -profile:v high -crf 10 -c:a aac -b:a 256k"
-		arg2="[dbl8]"
+		arg1=",scale=ih*(16/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
+		arg2="[16.9]"
 		arg3=""
 		;;
 	  "i")
-		arg1=",scale=784:576:sws_flags=lanczos,setsar=sar=1/1,crop=780:520 -c:v libx264 -preset:v slow -profile:v high -crf 10 -c:a aac -b:a 256k"
-		arg2="[dbl8]"
+		arg1=",scale=ih*(16/9):ih:sws_flags=lanczos,setsar=sar=1/1,crop=ih*(3/2):ih -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
+		arg2="[3.2]"
 		arg3=""
 		;;
 	  "z")
@@ -98,9 +92,9 @@ done
 	echo -e "\n"
 	echo -e "     (n) None"
 	echo -e "     (l) Low  [3:1]"
-	echo -e "     (m) Medium  [3:3b3]"
-	echo -e "     (h) High  [4:4b4]"
-	echo -e "     (v) Very high  [4:7b7]"
+	echo -e "     (m) Medium  [3:2b2]"
+	echo -e "     (h) High  [3:4b4]"
+	echo -e "     (v) Very high  [4:5b5]"
 	echo -e ""
 	read -p "       Select deblocking/denoising level: " answer1
 	echo -e ""
@@ -115,16 +109,16 @@ done
 		arg8="[3_1]"
 		;;
 		"m")
-		arg5=",uspp=3:3,bm3d=sigma=3"
-		arg8="[3_3b3]"
+		arg5=",uspp=3:2,bm3d=sigma=2:bstep=12:mstep=8:group=1:estim=basic"
+		arg8="[3_2b2]"
 		;;
 		"h")
-		arg5=",uspp=4:4,bm3d=sigma=4"
-		arg8="[4_4b4]"
+		arg5=",uspp=3:4,bm3d=sigma=4:bstep=12:mstep=8:group=1:estim=basic"
+		arg8="[3_4b4]"
 		;;
 		"v")
-		arg5=",uspp=4:7,bm3d=sigma=7"
-		arg8="[4_7b7]"
+		arg5=",uspp=4:5,bm3d=sigma=5"
+		arg8="[4_5b5]"
 		;;
 	  *)
 		echo "Invalid answer, exiting..."
@@ -136,9 +130,9 @@ done
 		# ... select length
 		echo -e "\n"
 		echo -e "     (f) Full video length"
-		echo -e "     (s) Short preview  [5s]"
-		echo -e "     (m) Medium preview  [10s]"
-		echo -e "     (l) Long preview  [15s]"
+		echo -e "     (s) Short preview  [3s]"
+		echo -e "     (m) Medium preview  [6s]"
+		echo -e "     (l) Long preview  [12s]"
 		echo -e ""
 		read -p "       Select processing length: " answer1
 
@@ -148,16 +142,16 @@ done
 			arg7=""
 			;;
 		  "s")
-			arg6="-ss 00:15 -t 5"
-			arg7="[05s]"
+			arg6="-ss 00:15 -t 3"
+			arg7="[03]"
 			;;
 		  "m")
-			arg6="-ss 00:15 -t 10"
-			arg7="[10s]"
+			arg6="-ss 00:15 -t 6"
+			arg7="[06s]"
 			;;
 		  "l")
-			arg6="-ss 00:15 -t 15"
-			arg7="[15s]"
+			arg6="-ss 00:15 -t 12"
+			arg7="[12s]"
 			;;
 		  *)
 			echo "Invalid answer, exiting..."
@@ -176,4 +170,4 @@ do
       ffmpeg ${arg6} -i ${f} -vf format=yuv420p${arg4}${arg5}${arg1} ${base1}${arg2}${arg8}${arg9}${arg7}${f}${arg3}.mp4 -y
 done
 
-echo -e "\n\n\n  \e[4mFinished.\e[0m \n\n\n"
+echo -e "\n\n\n  ${sYe} Finished. ${sNo} \n\n\n"
