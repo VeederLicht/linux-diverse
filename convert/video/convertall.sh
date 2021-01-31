@@ -1,5 +1,7 @@
 #!/bin/bash
 
+clear
+
 # Define text styles
 sYe="\e[93m"
 sNo="\033[1;30m"
@@ -9,7 +11,7 @@ sNo="\033[1;30m"
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
 echo -e "       Batch convert old video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
-echo -e "  --------------------------------------------${sYe} v0.91 ${sNo}----------------------------------------------------"
+echo -e "  --------------------------------------------${sYe} v0.95 ${sNo}----------------------------------------------------"
 echo -e ""
 
 # Test nr. of arguments
@@ -67,31 +69,10 @@ done
 	esac
 
 
-	# ... select deinterlacing
-	echo -e "\n"
-	read -p "       Deïnterlace? (y/n)" answer1
-	echo -e ""
-
-	case $answer1 in
-	  "y")
-		arg4=",yadif"
-		arg9="[y]"
-		;;
-	  "n")
-		arg4=""
-		arg9=""
-		;;
-	  *)
-		echo "Invalid answer, exiting..."
-		exit 3
-		;;
-	esac
-
-
 	# ... select deblocking
 	echo -e "\n"
 	echo -e "     (n) None"
-	echo -e "     (l) Low  [3:1]"
+	echo -e "     (l) Low  [2:1]"
 	echo -e "     (m) Medium  [3:2b2]"
 	echo -e "     (h) High  [3:4b4]"
 	echo -e "     (v) Very high  [4:5b5]"
@@ -105,15 +86,15 @@ done
 		arg8=""
 		;;
 	  "l")
-		arg5=",uspp=3:1"
-		arg8="[3_1]"
+		arg5=",uspp=2:1"
+		arg8="[2_1]"
 		;;
 		"m")
-		arg5=",uspp=3:2,bm3d=sigma=2:bstep=12:mstep=8:group=1:estim=basic"
+		arg5=",uspp=3:2,bm3d=sigma=2"
 		arg8="[3_2b2]"
 		;;
 		"h")
-		arg5=",uspp=3:4,bm3d=sigma=4:bstep=12:mstep=8:group=1:estim=basic"
+		arg5=",uspp=3:4,bm3d=sigma=4"
 		arg8="[3_4b4]"
 		;;
 		"v")
@@ -126,6 +107,31 @@ done
 		;;
 	esac
 
+
+
+	# ... select deinterlacing
+	echo -e "\n"
+	echo -e "Note: in order for deinterlacing to work properly, the footage should be thouroughly deblocked"
+	echo -e ""
+	read -p "       Deïnterlace? (y/n)" answer1
+	echo -e ""
+
+	case $answer1 in
+	  "y")
+		arg4=",bwdif"
+		arg9="[bd]"
+		;;
+	  "n")
+		arg4=""
+		arg9=""
+		;;
+	  *)
+		echo "Invalid answer, exiting..."
+		exit 3
+		;;
+	esac
+
+	
 
 		# ... select length
 		echo -e "\n"
@@ -143,7 +149,7 @@ done
 			;;
 		  "s")
 			arg6="-ss 00:15 -t 3"
-			arg7="[03]"
+			arg7="[03s]"
 			;;
 		  "m")
 			arg6="-ss 00:15 -t 6"
@@ -165,9 +171,9 @@ done
 
 for f in $@
 do
-  echo -e " "
+	echo -e " "
 	echo -e "........................Processing ${f}......................"
-      ffmpeg ${arg6} -i ${f} -vf format=yuv420p${arg4}${arg5}${arg1} ${base1}${arg2}${arg8}${arg9}${arg7}${f}${arg3}.mp4 -y
+		ffmpeg ${arg6} -i ${f} -vf format=yuv420p${arg5}${arg4}${arg1} ${base1}${arg2}${arg8}${arg9}${arg7}${f}${arg3}.mp4 -y
 done
 
 echo -e "\n\n\n  ${sYe} Finished. ${sNo} \n\n\n"
