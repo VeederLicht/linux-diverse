@@ -76,9 +76,13 @@ extension=curl
 
 ## Nextcloud
 
+__1. install
+
 `pacman -S nextcloud`
 
 > Config: /etc/webapps/nextcloud/config/config.php
+
+__2. create database
 
 ```
 mysql -u root -p
@@ -88,7 +92,16 @@ mysql> FLUSH PRIVILEGES;
 mysql> \q
 ```
 
+__3. setup
+
 `occ maintenance:install --database pgsql --database-name nextcloud --database-host localhost --database-user nextcloud --database-pass=<password> --data-dir /var/lib/nextcloud/data/`
+
+_(or use the webinterface)
+
+__4. add admin user
+
+`occ user:add --display-name="Richard vdB" --group="users" --group="db-admins" --group="db-admins" richardpp`
+
 
 
 ### APCu caching
