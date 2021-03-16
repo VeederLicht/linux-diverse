@@ -91,6 +91,28 @@ mysql> \q
 `occ maintenance:install --database pgsql --database-name nextcloud --database-host localhost --database-user nextcloud --database-pass=<password> --data-dir /var/lib/nextcloud/data/`
 
 
+### APCu caching
+
+__1. APCu can be installed with the php-apcu package. Recommended configuration:
+
+> /etc/php/conf.d/apcu.ini
+
+```
+extension=apcu.so
+apc.enabled=1
+apc.shm_size=32M
+apc.ttl=7200
+apc.enable_cli=1
+
+```
+
+__2. Nextcloud config
+
+> config.php
+
+`'memcache.local' => '\OC\Memcache\APCu',`
+
+
 ## php-fpm
 
 > /etc/php/php-fpm.d/nextcloud.conf
