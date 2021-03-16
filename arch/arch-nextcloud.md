@@ -166,3 +166,53 @@ types_hash_max_size 4096;
 ...werkt alleen als:
 1. nginx -t ook succesvol is
 2. de DNS records naar de juiste server staan.
+3. de configuratiebestanden van nginx correct zijn ingesteld, anders moeten de aangemaakte sleutels handmatig worden toegevoegd in de serverblocks:
+
+```
+ssl_certificate /etc/letsencrypt/live/DOMAIN/fullchain.pem; # managed by Certbot
+ssl_certificate_key /etc/letsencrypt/live/DOMAIN/privkey.pem; # managed by Certbot
+include /etc/letsencrypt/options-ssl-nginx.conf;
+```
+
+
+Vergeet ook niet de cron-job te starten voor het automatisch verlengen van het certificaat: 
+
+
+Check of de renewal werkt: `certbot renew --dry-run`
+
+### autorenewal
+
+__1. Create a systemd certbot.service:*
+
+> /etc/systemd/system/certbot.service
+
+```
+[Unit]
+Description=Let's Encrypt renewal
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/certbot renew --quiet --agree-tos
+```
+
+
+__2. Add a timer to check for certificate renewal twice a day and include a randomized delay so that everyone's requests for renewal will be spread over the day to lighten the Let's Encrypt server load [2]:
+
+> /etc/systemd/system/certbot.timer
+
+```
+[Unit]
+Description=Twice daily renewal of Let's Encrypt's certificates
+
+[Timer]
+OnCalendar=0/12:00:00
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+__3. Enable and start certbot.timer
+
+`systemctl enable --now certbot.timer`
