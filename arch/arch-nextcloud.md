@@ -214,7 +214,7 @@ Description=Let's Encrypt renewal
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/certbot renew --quiet --agree-tos
+ExecStart=/usr/bin/certbot renew --quiet --agree-tos --deploy-hook "systemctl reload nginx.service"
 ```
 
 
@@ -227,7 +227,7 @@ __2. Add a timer to check for certificate renewal twice a day and include a rand
 Description=Twice daily renewal of Let's Encrypt's certificates
 
 [Timer]
-OnCalendar=0/12:00:00
+OnCalendar=*-*-* 0:30:00
 RandomizedDelaySec=1h
 Persistent=true
 
