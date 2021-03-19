@@ -52,6 +52,10 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 ### Get framerate (for use in scripts etc)
 `ffmpeg -i VTS_04_1.VOB 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p"`
 
+### Preproces, All-intra H265 DNxHR alternative (YUV444 capable! but not widely supported):
+`ffmpeg -i in.mov "format=yuv420p,setsar=sar=1/1,bm3d=sigma=12,atadenoise,unsharp=3:3:0.4,unsharp=5:5:0.2" -c:v hevc_nvenc -preset llhq -intra -qp:v 15 -movflags use_metadata_tags -c:a aac -b:a 384k out.mp4`
+
+
 ### Convert to DNxHR (_lb, _sq, _hq, _hqx, _444)
 `ffmpeg -i input.mts -vf format=yuv422p,... -c:v dnxhd -b:v 90M -c:a pcm_s16le output.mxf`
 
