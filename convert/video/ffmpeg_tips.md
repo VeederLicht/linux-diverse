@@ -87,6 +87,15 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 `ffmpeg -i INPUT.mp4 -i INPUT.mp3 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
 
 <br>
+## WEBCAM
+
+### Windows (dshow)
+'ffmpeg -f dshow -video_size 640x480  -i video="USB Camera":audio="Microfoon (2- USB Audio CODEC )" -vf format=yuv420p,scale=320:-2:sws_flags=gauss,crop=320:180,atadenoise,setsar=sar=1/1 -c:v libx264 -preset fast -qp:v 30 -af "highpass=f=200,lowpass=f=3000,afftdn=nt=w:om=o" -c:a aac -b:a 48k out.mp4 -y'
+
+### Linux (v4l2)
+
+
+<br>
 <br>
 
 ## INFO
