@@ -87,10 +87,20 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 `ffmpeg -i INPUT.mp4 -i INPUT.mp3 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv`
 
 <br>
+
 ## WEBCAM
 
 ### Windows (dshow)
-'ffmpeg -f dshow -video_size 640x480  -i video="USB Camera":audio="Microfoon (2- USB Audio CODEC )" -vf format=yuv420p,scale=320:-2:sws_flags=gauss,crop=320:180,atadenoise,setsar=sar=1/1 -c:v libx264 -preset fast -qp:v 30 -af "highpass=f=200,lowpass=f=3000,afftdn=nt=w:om=o" -c:a aac -b:a 48k out.mp4 -y'
+
+`ffmpeg -f dshow -video_size 640x480  -i video="USB Camera":audio="Microfoon (2- USB Audio CODEC )" -vf format=yuv420p,scale=128:-2:sws_flags=gauss,crop=128:72,atadenoise,setsar=sar=1/1 -c:v libx264 -preset fast -qp:v 30 -af "highpass=f=200,lowpass=f=3000,afftdn=nt=w:om=o" -c:a aac -b:a 48k out.mp4 -y`
+
+**met compressie en H265**
+
+`ffmpeg -f dshow -video_size 640x480  -i video="USB Camera":audio="Microfoon (2- USB Audio CODEC )" -vf format=yuv420p,scale=128:-2:sws_flags=gauss,crop=128:72,atadenoise,setsar=sar=1/1 -c:v libx265 -qp:v 25 -af "highpass=f=200,lowpass=f=3000,afftdn=nt=w:om=o,compand=attacks=0:points=-80/-900|-45/-15|-27/-9|-5/-5|20/20" -c:a aac -b:a 32k out.mp4 -y`
+
+**webm vp9 (zeer goed!)**
+
+`ffmpeg -f dshow -video_size 640x480  -i video="USB Camera":audio="Microfoon (2- USB Audio CODEC )" -vf format=yuv420p,scale=128:-2:sws_flags=gauss,crop=128:72,atadenoise,setsar=sar=1/1 -c:v libvpx-vp9 -crf:v 35 -af "highpass=f=200,lowpass=f=3000,afftdn=nt=w:om=o"  -c:a libopus -b:a 32k out.webm -y`
 
 ### Linux (v4l2)
 
