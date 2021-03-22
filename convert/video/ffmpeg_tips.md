@@ -106,9 +106,16 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 
 In Linux lijkt het  lastiger om de streams te synchroniseren, maar met onderstaand commando wordt de gecombineerde stream naar een ander ffmpeg proces gepiped:
 
-`ffmpeg -fflags nobuffer -f v4l2 -i /dev/video0 -itsoffset 0.25 -f alsa -i hw:0 -c:v copy -c:a copy -f nut pipe:1 | ffmpeg -i pipe:0 -vf format=yuv420p,crop=iw:iw/16*9,scale=640:-2:sws_flags=gauss,removegrain=2:2:2:2,atadenoise,setsar=sar=1/1,smartblur=ls=-1,eq=contrast=1.1:brightness=0:saturation=1:gamma=1 -c:v libx265 -qp:v 30 -r 25 -af 'highpass=f=150,lowpass=f=3000,afftdn=nt=w:om=o,compand=attacks=0:points=-70/-900|-40/-20|-25/-15|-5/-5|20/20,crystalizer' -c:a aac -b:a 64k out.mp4 -y`
+`ffmpeg -fflags nobuffer -f v4l2 -i /dev/video0 -itsoffset 0.25 -f alsa -i hw:0 -c:v copy -c:a copy -f nut pipe:1 | ffmpeg -i pipe:0 -vf format=yuv420p,crop=iw:iw/16*9,scale=640:-2:sws_flags=gauss,removegrain=2:2:2:2,atadenoise,setsar=sar=1/1,smartblur=ls=-1,eq=contrast=1.1:brightness=0:saturation=1:gamma=1 -c:v libx265 -qp:v 30 -r 25 -af 'highpass=f=150,lowpass=f=3000,afftdn=nt=w:om=o,compand=attacks=0:points=-55/-100|-40/-20|-25/-15|-5/-5|20/20,crystalizer' -c:a aac -b:a 64k out.mp4 -y`
 
-
+> *-fflags nobuffer* zou latency verminderen
+> *-f v4l2 -i /dev/video0* linux, gebruik video stream 0
+> *-itsoffset 0.25 -f alsa -i hw:0* voeg 0.25s latency toe aan de audiostream 0
+> *-c:v copy -c:a copy* gebruik de streams zoals ze zijn, niet converteren
+> *-f nut* ffmpeg raw stream format, lage overhead
+> *pipe:1 | ffmpeg -i pipe:0* voer eerder genoemde streams in nieuwe ffmpeg (misschien niet nodig?)
+> ...
+> *compand=points=...* elke sectie tussen '|' stelt de eerstgenoemde geluidssterkte bij naar die achter de '/', dus sterker of zachter
 
 <br>
 <br>
