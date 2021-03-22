@@ -104,6 +104,11 @@ https://superuser.com/questions/891145/ffmpeg-upscale-and-letterbox-a-video
 
 ### Linux (v4l2)
 
+In Linux lijkt het  lastiger om de streams te synchroniseren, maar met onderstaand commando wordt de gecombineerde stream naar een ander ffmpeg proces gepiped:
+
+`ffmpeg -f v4l2 -i /dev/video0 -f alsa -i hw:2 -c copy -f nut pipe:1 | ffmpeg -y -i pipe:0 -c copy -f nut -vf format=yuv420p,scale=384:-2:sws_flags=gauss,crop=384:216,atadenoise,setsar=sar=1/1,unsharp=3:3:0.5 -c:v libx265 -qp:v 30 -r 25 -af 'highpass=f=150,lowpass=f=3500,afftdn=nt=w:om=o,compand=attacks=0:points=-70/-900|-40/-20|-25/-15|-5/-5|20/20' -c:a aac -b:a 48k  out.mp4 -y`
+
+
 
 <br>
 <br>
