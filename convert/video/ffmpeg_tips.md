@@ -23,6 +23,42 @@
 
 ## CONVERT
 
+### 2-pass high quality
+
+#### AV1 (superb but slow!), high quality 2-pass settings for batch script
+```
+Q=50 && EXT="mov" && time for i in  *.${EXT}; do
+    nice ffmpeg -y -i "$i" -c:v libaom-av1 -strict -2 \
+         -b:v 0 -crf $Q \
+         -aq-mode 2 -an \
+         -sc_threshold 0 \
+         -row-mt 1  -tile-columns 2 -tile-rows 2 -threads 12  \
+         -cpu-used 8 \
+         -auto-alt-ref 1 -lag-in-frames 25 -g 999 \
+         -pass 1 -f webm \
+         "$(basename "$i" .${EXT})"-av1.temp
+    nice ffmpeg -y -i "$i" -c:v libaom-av1 -strict -2 \
+         -b:v 0 -crf $Q -aq-mode 2  \
+         -sc_threshold 0 \
+         -row-mt 1  -tile-columns 2 -tile-rows 2 -threads 8 \
+         -cpu-used 1 \
+         -auto-alt-ref 1 -lag-in-frames 25 -g 999 \
+         -c:a libopus -b:a 96k \
+         -pass 2 -threads 12 \
+         "$(basename "$i" .${EXT})"-av1-q${Q}-cpu-used-1.webm
+done
+```
+see: https://www.draketo.de/software/ffmpeg-compression-vp9-av1.html
+
+#### Same for VP9
+```
+Q=56 && EXT="mov" && time for i in  *.${EXT}; do
+    ffmpeg -i input.mp4 -c:v libvpx-vp9 -b:v 0 -crf 40 -pass 1 -an -f null /dev/null && \
+    ffmpeg -i input.mp4 -c:v libvpx-vp9 -b:v 0 -crf 40 -pass 2 -c:a libopus -b:a 96k .${EXT})"-(vp9-2pass).webm
+done
+```
+
+
 ### To apply letterbox/pillarbox, scaling to 1280x720
 `ffmpeg -i input -vf "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:-1:-1:color=black" output.mp4`
 https://superuser.com/questions/547296/resizing-videos-with-ffmpeg-avconv-to-fit-into-static-sized-player
