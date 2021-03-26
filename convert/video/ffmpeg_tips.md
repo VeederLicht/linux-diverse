@@ -49,6 +49,7 @@ Q=50 && EXT="mov" && time for i in  *.${EXT}; do
 done
 ```
 see: https://www.draketo.de/software/ffmpeg-compression-vp9-av1.html
+also: https://www.streamingmedia.com/Articles/Editorial/Featured-Articles/AV1-Has-Arrived-Comparing-Codecs-from-AOMedia-Visionular-and-Intel-Netflix-142941.aspx?utm_source=related_articles&utm_medium=gutenberg&utm_campaign=editors_selection
 
 #### Same for VP9
 ```
