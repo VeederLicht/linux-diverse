@@ -54,7 +54,7 @@ see: https://www.draketo.de/software/ffmpeg-compression-vp9-av1.html
 ```
 Q=56 && EXT="mov" && time for i in  *.${EXT}; do
     ffmpeg -i input.mp4 -c:v libvpx-vp9 -b:v 0 -crf 40 -pass 1 -an -f null /dev/null && \
-    ffmpeg -i input.mp4 -c:v libvpx-vp9 -b:v 0 -crf 40 -pass 2 -c:a libopus -b:a 96k .${EXT})"-(vp9-2pass).webm
+    ffmpeg -i input.mp4 -c:v libvpx-vp9 -b:v 0 -crf 40 -pass 2 -c:a libopus -b:a 96k "$(basename "$i" .${EXT})"-(vp9-2pass_crf${Q}).webm
 done
 ```
 
