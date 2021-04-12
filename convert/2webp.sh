@@ -57,7 +57,7 @@ echo -e "${sNo}"
 		echo -e "\n\n\n  ⟹  PROCESSING  ${f}:" >> 2webp.rep
 
 		## De-interlace
-		ffmpeg -loglevel repeat+level+verbose -i "${f}" -vf "spp=4:6,bm3d=sigma=2,scale=w='min(iw,$r)':h='min(ih,$r)':force_original_aspect_ratio=decrease,unsharp=3:3:0.5" $x -q:v $q "${f}.webp" -y 2>> 2webp.rep
+		ffmpeg -hide_banner -loglevel repeat+level+verbose -i "${f}" -vf "spp=4:6,bm3d=sigma=2,scale=w='min(iw,$r)':h='min(ih,$r)':force_original_aspect_ratio=decrease,unsharp=3:3:0.5" $x -q:v $q "${f}.webp" -y 2>> 2webp.rep
 
 	done
 
