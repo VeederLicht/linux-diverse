@@ -12,7 +12,7 @@ sNo="\e[36m"
 echo -e "\n ${sYe}"
 echo -e "  ============================================================================"
 echo -e "  An image2WEBP conversion script using ffmpeg, RickOrchard 2021, no copyright"
-echo -e "  ------------------------------ v1.0 ----------------------------------------"
+echo -e "  ------------------------------ v1.1 ----------------------------------------"
 echo -e "${sNo}"
 
 
@@ -57,7 +57,7 @@ echo -e "${sNo}"
 		echo -e "\n\n\n  ⟹  PROCESSING  ${f}:" >> 2webp.rep
 
 		## De-interlace
-		ffmpeg -loglevel repeat+level+verbose -i $f -vf "pp7,bm3d=sigma=2,scale=w='min(iw,$r)':h='min(ih,$r)':force_original_aspect_ratio=decrease,unsharp=3:3:1" $x -q:v $q $f.webp -y 2>> 2webp.rep
+		ffmpeg -loglevel repeat+level+verbose -i "${f}" -vf "spp=4:6,bm3d=sigma=2,scale=w='min(iw,$r)':h='min(ih,$r)':force_original_aspect_ratio=decrease,unsharp=3:3:0.5" $x -q:v $q "${f}.webp" -y 2>> 2webp.rep
 
 	done
 
