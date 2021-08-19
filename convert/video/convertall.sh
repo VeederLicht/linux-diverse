@@ -4,14 +4,14 @@ clear
 
 # Define text styles
 sYe="\e[93m"
-sNo="\033[1;30m"
+sNo="\033[1;35m"
 
 
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
 echo -e "       Batch convert old video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
-echo -e "  --------------------------------------------${sYe} v0.95 ${sNo}----------------------------------------------------"
+echo -e "  --------------------------------------------${sYe} v0.97b ${sNo}----------------------------------------------------"
 echo -e ""
 
 # Test nr. of arguments
@@ -36,7 +36,7 @@ done
 	echo -e "     (a) Preprocess to 4/3 (sar 1/1), no crop"
 	echo -e "     (e) Preprocess to 16/9 (sar 1/1), no crop"
 	echo -e "     (i) Preprocess to 16/9 (sar 1/1), crop to (3/2)"
-	echo -e "     (z) Postprocess/finalize (H265)"
+	echo -e "     (z) Postprocess/finalize (AV1)"
 	echo -e ""
 	read -p "      Select profile: " answer1
 	echo -e ""
@@ -46,21 +46,26 @@ done
 		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
 		arg2="[4.3]"
 		arg3=""
+        arg10="mp4"
 		;;
 	  "e")
 		arg1=",scale=ih*(16/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
 		arg2="[16.9]"
 		arg3=""
+        arg10="mp4"
 		;;
 	  "i")
 		arg1=",scale=ih*(16/9):ih:sws_flags=lanczos,setsar=sar=1/1,crop=ih*(3/2):ih -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
 		arg2="[3.2]"
 		arg3=""
+        arg10="mp4"
 		;;
 	  "z")
-		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.2 -af crystalizer -c:v hevc_nvenc -preset slow -rc vbr_hq -c:a aac -b:a 192k"
+#		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.2 -af crystalizer -c:v hevc_nvenc -preset slow -rc vbr_hq -c:a aac -b:a 192k"
+		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.2 -af crystalizer -c:v libaom-av1 -crf 30 -cpu-used 8 -c:a libopus -b:a 128k"
 		arg2=""
-		arg3="[h265]"
+		arg3="[av1]"
+        arg10="mkv"
 		;;
 	  *)
 		echo "Invalid answer, exiting..."
@@ -173,7 +178,7 @@ for f in $@
 do
 	echo -e " "
 	echo -e "........................Processing ${f}......................"
-		ffmpeg ${arg6} -i ${f} -vf format=yuv420p${arg5}${arg4}${arg1} ${base1}${arg2}${arg8}${arg9}${arg7}${f}${arg3}.mp4 -y
+		ffmpeg ${arg6} -i ${f} -vf format=yuv420p${arg5}${arg4}${arg1} ${base1}${arg2}${arg8}${arg9}${arg7}${f}${arg3}.${arg10} -y
 done
 
 echo -e "\n\n\n  ${sYe} Finished. ${sNo} \n\n\n"
