@@ -10,15 +10,15 @@ m_comment='VIDEOTOOL: Blackmagic Design DaVinci Resolve & AUDIOTOOL: Izotope RX8
 clear
 
 # Define constants
-scriptv="v0.99"
+scriptv="v0.99c"
 sYe="\e[93m"
 sNo="\033[1;35m"
-logfile=$(date +%Y%m%d_%H.%M_)"convertall.rep"
+logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
 
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "       Batch convert old video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
+echo -e "       Batch process (old) video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
@@ -38,7 +38,7 @@ done
 
 
 echo -e "  =======================================================================================================" > $logfile
-echo -e "  -------------------------------------convertall.sh $scriptv logfile---------------------------------------\n" >> $logfile
+echo -e "  -------------------------------------vidconv.sh $scriptv logfile---------------------------------------\n" >> $logfile
 
 	base1="./"
 
