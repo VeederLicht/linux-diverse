@@ -10,7 +10,7 @@ m_comment='-'
 clear
 
 # Define constants
-scriptv="v0.89"
+scriptv="v0.92"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -18,7 +18,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "       Batch convert images, with filter options, RickOrchard 2021, no copyright"
+echo -e "       Batch convert old video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
@@ -29,11 +29,11 @@ if [ $# -eq 0 ]
 	exit 2
 fi
 
-echo -e "    INPUT FILES:"
-for f in $@
+# !!!! ARGUMENTS IN DOUBLE QOUTES TO AVOID PROBLEMS WITH SPACES IN FILENAMES!!! https://stackoverflow.com/questions/12314451/accessing-bash-command-line-args-vs
+for f in "$@"
 do
-	echo -n "    ✻ ${f}  ➢➢  "
-	ffprobe -i ${f} -v fatal -select_streams v:0 -show_entries stream=height,width,sample_aspect_ratio,display_aspect_ratio,avg_frame_rate -of csv=s=,:p=0:nk=0
+	echo -n "    ✻ "$f"  ➢➢  "
+	ffprobe -i "$f" -v fatal -select_streams v:0 -show_entries stream=height,width,sample_aspect_ratio,display_aspect_ratio,avg_frame_rate -of csv=s=,:p=0:nk=0
 done
 
 
@@ -284,17 +284,18 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 # LET'S GET TO WORK
 
-for f in $@
+for f in "$@"
 do
-    outfile=${f}.$arg0
+    outfile="$f".$arg0
 	echo -e " "
-	echo -e "........................Processing ${f}...to...$outfile................"
+	echo -e "........................Processing "$f"...to...$outfile................"
 	echo -e ".\n.\n.\n." >> $logfile
-    magick ${f} -auto-orient $arg1 $arg2 $arg3 $arg4 $arg9 -verbose $outfile
+    magick "$f" -auto-orient $arg1 $arg2 $arg3 $arg4 $arg9 -verbose "$outfile"
     if [ $include_meta = "y" ]; then
-        exiv2 -ea- ${f} | exiv2 -ia- $outfile &>> $logfile
+        exiv2 -ea- "$f" | exiv2 -ia- "$outfile" &>> $logfile
     fi
 done
+
 
 
 echo -e "\n\n  ---------------------------------------------END-------------------------------------------------------\n" >> $logfile
