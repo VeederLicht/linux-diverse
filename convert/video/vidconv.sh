@@ -10,7 +10,7 @@ m_comment='VIDEOTOOL: Blackmagic Design DaVinci Resolve & AUDIOTOOL: Izotope RX8
 clear
 
 # Define constants
-scriptv="v1.0"
+scriptv="v1.02"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -18,7 +18,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "       Batch convert old video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
+echo -e "       Batch process (old) video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
@@ -94,25 +94,15 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	  "1")
         echo -e "  -----------------Postprocess/finalize (AV1) \n" >> $logfile
         arg0="-vf format=yuv420p"
-#		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.2 -af crystalizer -c:v libaom-av1 -cpu-used 7 -crf 30 -c:a libopus -b:a 128k"
-		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.2 -c:v libaom-av1 -cpu-used 7 -crf 30 -c:a libopus -b:a 128k"
+		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.2 -c:v libaom-av1 -cpu-used 6 -denoise-noise-level 0 -arnr-strength 0 -crf 28 -c:a libopus -b:a 128k"
 		arg2=""
 		arg3=".av1"
         arg10=".mp4"
 		;;
-	  "9")
-        echo -e "  -----------------Postprocess/finalize (VP9) \n" >> $logfile
-        arg0="-vf format=yuv420p"
-#		arg1=",setsar=sar=1/1,unsharp=3:3:0.5,unsharp=5:5:0.2 -af crystalizer -c:v libvpx-vp9 -cpu-used 2 -crf 35 -c:a libopus -b:a 128k"
-		arg1=",setsar=sar=1/1,unsharp=3:3:0.5,unsharp=5:5:0.2 -c:v libvpx-vp9 -cpu-used 2 -crf 35 -c:a libopus -b:a 128k"
-		arg2=""
-		arg3=".vp9"
-        arg10=".webm"
-		;;
 	  "4")
         echo -e "  -----------------Postprocess/finalize (H264) \n" >> $logfile
         arg0="-vf format=yuv420p"
-		arg1=",setsar=sar=1/1,unsharp=3:3:0.4,unsharp=5:5:0.1 -c:v libx264 -preset:v slow -profile:v high -crf 22 -c:a aac -b:a 192k"
+		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1 -c:v libx264 -preset:v slow -profile:v high -crf 22 -c:a aac -b:a 192k"
 		arg2=""
 		arg3=".h264"
         arg10=".mp4"
