@@ -10,7 +10,7 @@ m_comment='VIDEOTOOL: Blackmagic Design DaVinci Resolve & AUDIOTOOL: Izotope RX8
 clear
 
 # Define constants
-scriptv="v1.02"
+scriptv="v1.1"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -49,7 +49,6 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	echo -e "     (c) Preprocess to 16/9 (sar 1/1), no crop"
 	echo -e "     (d) Preprocess to 16/9 (sar 1/1), crop to (3/2)"
 	echo -e "     (1) Postprocess/finalize (AV1)"
-	echo -e "     (9) Postprocess/finalize (VP9)"
 	echo -e "     (4) Postprocess/finalize (H264)"
 	echo -e "     (m) Change container to mp4"
 	echo -e ""
@@ -71,40 +70,48 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         echo -e "  -----------------Preprocess to 4/3 (sar 1/1), no crop \n" >> $logfile
         arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -c:a aac -b:a 256k"
-		arg2="[4.3]"
-		arg3=".h264"
+		arg2=."[4.3]"
+		arg3=".[h264]"
         arg10=".m4v"
 		;;
 	  "c")
         echo -e "  -----------------Preprocess to 16/9 (sar 1/1), no crop \n" >> $logfile
         arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(16/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -c:a aac -b:a 256k"
-		arg2="[16.9]"
-		arg3=".h264"
+		arg2=".[16.9]"
+		arg3=".[h264]"
         arg10=".m4v"
 		;;
 	  "d")
         echo -e "  -----------------Preprocess to 16/9 (sar 1/1), crop to (3/2) \n" >> $logfile
         arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(16/9):ih:sws_flags=lanczos,setsar=sar=1/1,crop=ih*(3/2):ih -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -c:a aac -b:a 256k"
-		arg2="[3.2]"
-		arg3=".h264"
+		arg2=".[3.2]"
+		arg3=".[h264]"
         arg10=".m4v"
 		;;
+#	  "1")
+#        echo -e "  -----------------Postprocess/finalize (AV1 / libaom) \n" >> $logfile
+#        arg0="-vf format=yuv420p"
+#		arg1=",setsar=sar=1/1,unsharp=3:3:0.5,unsharp=5:5:0.1 -c:v libaom-av1 -g 32 -keyint_min 32 -sc_threshold 0 -row-mt 1 -tiles 2x2 -cpu-used 5 -denoise-noise-level 0 -arnr-strength 0 -crf 30 -b:v 0 -c:a libopus -b:a 128k"
+#		arg2=""
+#		arg3=".[av1]"
+#        arg10=".webm"
+#		;;
 	  "1")
-        echo -e "  -----------------Postprocess/finalize (AV1) \n" >> $logfile
+        echo -e "  -----------------Postprocess/finalize (AV1 / libsvt) \n" >> $logfile
         arg0="-vf format=yuv420p"
-		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.2 -c:v libaom-av1 -cpu-used 6 -denoise-noise-level 0 -arnr-strength 0 -crf 28 -c:a libopus -b:a 128k"
+		arg1=",setsar=sar=1/1,unsharp=3:3:0.9,eq=contrast=1.01 -c:v libsvtav1 -preset 7 -qp 27 -b:v 0 -c:a libopus -b:a 128k"
 		arg2=""
-		arg3=".av1"
-        arg10=".mp4"
+		arg3=".[av1]"
+        arg10=".webm"
 		;;
 	  "4")
         echo -e "  -----------------Postprocess/finalize (H264) \n" >> $logfile
         arg0="-vf format=yuv420p"
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1 -c:v libx264 -preset:v slow -profile:v high -crf 22 -c:a aac -b:a 192k"
 		arg2=""
-		arg3=".h264"
+		arg3=".[h264]"
         arg10=".mp4"
 		;;
 	  "m")
@@ -122,15 +129,16 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	esac
 
 
-    if [ $answer1 != "m" ]; then
+	case $answer1 in
+	  "a"|"b"|"c"|"d")
 	    # ... select deinterlacing
 	    echo -e "\n"
 	    echo -e "Note: in order for deinterlacing to work properly, the footage should be thouroughly deblocked"
 	    echo -e ""
-	    read -p "       Deïnterlace? (y/n)" answer1
+	    read -p "       Deïnterlace? (y/n)" deint
 	    echo -e ""
 
-	    case $answer1 in
+	    case $deint in
 	      "y")
         echo -e "  -----------------Deinterlacing with bwdif \n" >> $logfile
 		    arg4=",bwdif"
@@ -139,10 +147,6 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	      "n")
 		    arg4=""
 		    arg9=""
-		    ;;
-	      *)
-		    echo "Unknown option, exiting..."
-		    exit 3
 		    ;;
 	    esac
 
@@ -154,10 +158,10 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	    echo -e "     (h) High  [3:4b4]"
 	    echo -e "     (v) Very high  [4:5b5]"
 	    echo -e ""
-	    read -p "       Select deblocking/denoising level: " answer1
+	    read -p "       Select deblocking/denoising level: " deblock
 	    echo -e ""
 
-	    case $answer1 in
+	    case $deblock in
 	      "n")
 		    arg5=""
 		    arg8=""
@@ -186,8 +190,26 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		    echo "Unknown option, exiting..."
 		    exit 3
 		    ;;
-	    esac	
-    fi
+	    esac
+        ;;
+	  "1"|"4")
+	    # ... select crystalizer
+	    echo -e "\n"
+	    echo -e ""
+	    read -p "       Apply audio crystalizer? (y/n)" cryst
+	    echo -e ""
+
+	    case $cryst in
+	      "y")
+            echo -e "  -----------------Apply audio crystalizer \n" >> $logfile
+		    arg11="-af crystalizer"
+		    ;;
+	      *)
+		    arg11=""
+		    ;;
+	    esac
+        ;;
+    esac
 
 
 	# ... select length
@@ -232,7 +254,7 @@ do
 	echo -e " "
 	echo -e "........................Processing ${f}......................"
 	echo -e ".\n.\n.\n." >> $logfile
-    time ffmpeg -hide_banner -nostats $arg6 -i ${f} $arg0$arg5$arg4$arg1 -metadata composer="$m_composer" -metadata copyright="$m_copyright" -metadata comment="$m_comment" $base1${f}$arg2$arg8$arg9$arg7$arg3$arg10 -y &>> $logfile
+    time ffmpeg -hide_banner -nostats $arg6 -i ${f} $arg0$arg5$arg4$arg1 $arg11 -movflags +faststart -metadata composer="$m_composer" -metadata copyright="$m_copyright" -metadata comment="$m_comment" $base1${f}$arg2$arg8$arg9$arg7$arg3$arg10 -y &>> $logfile
 done
 
 
