@@ -2,15 +2,15 @@
 
 
 # User information to inject in metadata
-m_composer='Richard van den Boogaardt  (richard@pinkpearl.eu)'
+m_composer='richard@pinkpearl.eu'
 m_copyright='©2021 Pink Pearl®'
-m_comment='VIDEOTOOL: Blackmagic Design DaVinci Resolve & AUDIOTOOL: Izotope RX8'
+m_comment='VIDEOTOOL: - & AUDIOTOOL: -'
 
 
 clear
 
 # Define constants
-scriptv="v1.12"
+scriptv="v1.15"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -103,7 +103,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         arg0="-vf format=yuv420p"
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.9,eq=contrast=1.01 -c:v libsvtav1 -c:a libopus -b:a 128k"
 		arg2=""
-		arg3=".[av1]"
+		arg3=".[av1-"
         arg10=".webm"
 		;;
 	  "4")
@@ -111,7 +111,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         arg0="-vf format=yuv420p"
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1 -c:v libx264 -c:a aac -b:a 192k"
 		arg2=""
-		arg3=".[h264]"
+		arg3=".[h264-"
         arg10=".mp4"
 		;;
 	  "m")
@@ -197,17 +197,24 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	    # ... select quality
 	    echo -e "\n"
 	    echo -e ""
-	    read -p "       Select output quality high/low (h/l): " qal
+	    read -p "       Select output quality high/medium/low (h/m/l): " qal
 	    echo -e ""
 
 	    case $qal in
 	      "h")
             echo -e "  -----------------High quality output \n" >> $logfile
             if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 28 -preset 6"; else arg12="-b:v 0 -crf 20 -preset:v slow -profile:v high"; fi
+            arg3="${arg3}high]"
+		    ;;
+	      "m")
+            echo -e "  -----------------Medium quality output \n" >> $logfile
+            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 45 -preset 7"; else arg12="-b:v 0 -crf 28 -preset:v fast -profile:v main"; fi
+            arg3="${arg3}medium]"
 		    ;;
 	      *)
             echo -e "  -----------------Low quality output \n" >> $logfile
-            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 45 -preset 7"; else arg12="-b:v 0 -crf 28 -preset:v fast -profile:v main"; fi
+            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 50 -preset 8"; else arg12="-b:v 0 -crf 32 -preset:v veryfast -profile:v main"; fi
+            arg3="${arg3}low]"
 		    ;;
 	    esac
 
