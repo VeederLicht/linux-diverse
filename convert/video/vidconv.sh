@@ -105,7 +105,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         arg0="-vf format=yuv420p"
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.9,eq=contrast=1.01 -c:v libsvtav1 -c:a libopus -b:a 128k"
 		arg2=""
-		arg3=".[av1-"
+		arg3="-av1]"
         arg10=".webm"
 		;;
 	  "4")
@@ -113,7 +113,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         arg0="-vf format=yuv420p"
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1 -c:v libx264 -c:a aac -b:a 192k"
 		arg2=""
-		arg3=".[h264-"
+		arg3="-h264]"
         arg10=".mp4"
 		;;
 	  "m")
@@ -206,17 +206,17 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	      "h")
             echo -e "  -----------------High quality output \n" >> $logfile
             if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 28 -preset 6"; else arg12="-b:v 0 -crf 20 -preset:v slow -profile:v high"; fi
-            arg3="${arg3}high]"
+            arg3=".[high${arg3}"
 		    ;;
 	      "m")
             echo -e "  -----------------Medium quality output \n" >> $logfile
             if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 45 -preset 7"; else arg12="-b:v 0 -crf 28 -preset:v fast -profile:v main"; fi
-            arg3="${arg3}medium]"
+            arg3=".[medium${arg3}"
 		    ;;
 	      *)
             echo -e "  -----------------Low quality output \n" >> $logfile
             if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 50 -preset 8"; else arg12="-b:v 0 -crf 32 -preset:v veryfast -profile:v main"; fi
-            arg3="${arg3}low]"
+            arg3=".[low${arg3}"
 		    ;;
 	    esac
 
