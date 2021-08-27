@@ -2,15 +2,17 @@
 
 
 # User information to inject in metadata
-m_composer='richard@pinkpearl.eu'
+m_composer=''
 m_copyright='©2021 Pink Pearl®'
 m_comment='VIDEOTOOL: - & AUDIOTOOL: -'
+m_title=''
+m_year=''
 
 
 clear
 
 # Define constants
-scriptv="v1.15"
+scriptv="v1.16"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -18,7 +20,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "       Batch process (old) video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
+echo -e "       Batch process (old) video's, deinterlacing + deblocking + scaling. RickOrchard 2020, no copyright"
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
@@ -29,11 +31,11 @@ if [ $# -eq 0 ]
 	exit 2
 fi
 
-echo -e "    INPUT FILES:"
-for f in $@
+# !!!! ARGUMENTS IN DOUBLE QOUTES TO AVOID PROBLEMS WITH SPACES IN FILENAMES!!! https://stackoverflow.com/questions/12314451/accessing-bash-command-line-args-vs
+for f in "$@"
 do
-	echo -n "    ✻ ${f}  ➢➢  "
-	ffprobe -i ${f} -v fatal -select_streams v:0 -show_entries stream=height,width,sample_aspect_ratio,display_aspect_ratio,avg_frame_rate -of csv=s=,:p=0:nk=0
+	echo -n "    ✻ "$f"  ➢➢  "
+	ffprobe -i "$f" -v fatal -select_streams v:0 -show_entries stream=height,width,sample_aspect_ratio,display_aspect_ratio,avg_frame_rate -of csv=s=,:p=0:nk=0
 done
 
 
@@ -274,12 +276,13 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 
 # LET'S GET TO WORK
 
-for f in $@
+for f in "$@"
 do
+    outfile=$base1"$f"$arg2$arg8$arg9$arg7$arg3$arg10
 	echo -e " "
-	echo -e "........................Processing ${f}......................"
+	echo -e "........................Processing "$f"...to...$outfile................"
 	echo -e ".\n.\n.\n." >> $logfile
-    time ffmpeg -hide_banner -nostats $arg6 -i ${f} $arg0$arg5$arg4$arg1 $arg12 $arg11 -movflags +faststart -metadata composer="$m_composer" -metadata copyright="$m_copyright" -metadata comment="$m_comment" $base1${f}$arg2$arg8$arg9$arg7$arg3$arg10 -y &>> $logfile
+    time ffmpeg -hide_banner -nostats $arg6 -i "$f" $arg0$arg5$arg4$arg1 $arg12 $arg11 -movflags +faststart -metadata composer="$m_composer" -metadata copyright="$m_copyright" -metadata comment="$m_comment" -metadata title="$m_title" -metadata year="$m_year" "$outfile" -y &>> $logfile
 done
 
 
