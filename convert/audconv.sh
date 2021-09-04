@@ -2,15 +2,15 @@
 
 
 # User information to inject in metadata
-m_composer='-'
-m_copyright='©2021 Pink Pearl®'
-m_comment='-'
+m_encoded_by='Pink Pearl® Digital Media'
+m_copyright=''
+m_encoder='ffmpeg'
 
 
 clear
 
 # Define constants
-scriptv="v0.97"
+scriptv="v0.97b"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"audconv.rep"
@@ -162,13 +162,13 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
         afilt=$EBU_R128""
 		;;
 	  "l")
-        afilt=$EBU_R128",compand=attacks=.05=decays=.05:points=-60/-200|-40/-65|-30/-27|-20/-20|20/20"
+        afilt=$EBU_R128",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20"
 		;;
 	  "m")
-        afilt=$EBU_R128",compand=attacks=.05=decays=.05:points=-60/-200|-40/-65|-30/-27|-20/-20|20/20,afftdn=nf=-40:nr=8"
+        afilt=$EBU_R128",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20,afftdn=nf=-35:nr=10"
 		;;
 	  "s")
-        afilt=$EBU_R128",compand=attacks=.05=decays=.05:points=-60/-200|-40/-65|-30/-27|-20/-20|20/20,afftdn=nf=-25:nr=10,highpass=f=150,lowpass=f=3500"
+        afilt=$EBU_R128",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20,afftdn=nf=-25:nr=15,highpass=f=150,lowpass=f=3500"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
@@ -272,7 +272,7 @@ do
 	echo -e " "
 	echo -e "........................Processing "$f" ...to... $outfile" | tee -a $logfile
 	echo -e ".\n.\n.\n." >> $logfile
-    ffmpeg -y -hide_banner  -i "$f"  $arg4 $arg1 $afilt $arg2 $arg3 "$outfile"
+    ffmpeg -y -hide_banner  -i "$f"  $arg4 $arg1 $afilt $arg2 $arg3 -metadata encoded_by=$m_encoded_by -metadata copyright=$m_copyright -metadata encoder=$m_encoder "$outfile"
 done
 
 
