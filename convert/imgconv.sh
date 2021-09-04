@@ -2,15 +2,15 @@
 
 
 # User information to inject in metadata
-m_composer='-'
-m_copyright='©2021 Pink Pearl®'
-m_comment='-'
+m_composer='Pink Pearl® Digital Media'
+m_copyright=''
+m_comment=''
 
 
 clear
 
 # Define constants
-scriptv="v0.92"
+scriptv="v0.93"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -43,25 +43,25 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 	base1="./"
 
 
-
-	# ... select quality
-	echo -e "\n"
-	echo -e "     (l) low quality"
-	echo -e "     (m) medium quality"
-	echo -e "     (h) high (lossless) quality"
-	echo -e ""
-	read -p "      Select output compression quality: " quality
-	echo -e ""
-
-
-
 	# ... select output format
+	read -e "      Select output format: "
 	echo -e "\n"
 	echo -e "     (a) Convert to avif (av1, no support for metadata)"
 	echo -e "     (w) Convert to webp"
 	echo -e "     (j) Convert to jpg"
 	echo -e ""
-	read -p "      Select output format: " answer1
+	read -p "      --> " answer1
+	echo -e ""
+	
+
+	# ... select quality
+	read -e "      Select quality: "
+	echo -e "\n"
+	echo -e "     (l) low quality"
+	echo -e "     (m) medium quality"
+	echo -e "     (h) high quality"
+	echo -e ""
+	read -p "      --> " answer1
 	echo -e ""
 
 	case $answer1 in
