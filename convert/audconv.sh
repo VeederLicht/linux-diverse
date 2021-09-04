@@ -10,7 +10,7 @@ m_encoder='ffmpeg'
 clear
 
 # Define constants
-scriptv="v0.97c"
+scriptv="v0.99"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"audconv.rep"
@@ -33,7 +33,7 @@ fi
 for f in "$@"
 do
 	echo -n "    ✻ "$f"  ➢➢  "
-	ffprobe -i "$f" -v fatal -select_streams v:0 -show_entries stream=height,width,sample_aspect_ratio,display_aspect_ratio,avg_frame_rate -of csv=s=,:p=0:nk=0
+	ffprobe -i "$f" -v fatal -select_streams v:0 -show_entries format=bit_rate,duration -of csv=s=,:p=0:nk=0
 done
 
 
@@ -86,7 +86,7 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
             ;;
         esac
         arg0a="m4a"
-        arg0b=$arg0b"aac-EBU_R128]"
+        arg0b=$arg0b"aac]"
 		;;
 		
 	  "o")
@@ -108,7 +108,7 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
             ;;
         esac
         arg0a="ogg"
-        arg0b=$arg0b"opus-EBU_R128]"
+        arg0b=$arg0b"opus]"
 		;;
 		
 		"m")
@@ -132,7 +132,7 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
             
         esac
         arg0a="mp3"
-        arg0b=$arg0b"lame-EBU_R128]"
+        arg0b=$arg0b"lame]"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
@@ -155,20 +155,18 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 	read -p "      --> " answer_noise
 	echo -e ""
 
-	EBU_R128="-af loudnorm=I=-16:LRA=11:TP=-1.5"
-
 	case $answer_noise in
 	  "n")
-        afilt=$EBU_R128""
+        afilt=""
 		;;
 	  "l")
-        afilt=$EBU_R128",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20"
+        afilt=",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20"
 		;;
 	  "m")
-        afilt=$EBU_R128",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20,afftdn=nf=-35:nr=10"
+        afilt=",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20,afftdn=nf=-35:nr=10"
 		;;
 	  "s")
-        afilt=$EBU_R128",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20,afftdn=nf=-25:nr=15,highpass=f=150,lowpass=f=3500"
+        afilt=",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20,afftdn=nf=-25:nr=15,highpass=f=150,lowpass=f=3500"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
@@ -189,7 +187,6 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
     fi
 
     echo -e "  ----------------[ $afilt ] \n" >> $logfile
-
 
 
 
@@ -238,7 +235,7 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 
     	# ... select length.........................................................................................
 	echo -e "      SELECT LENGTH: "
-	echo -e "     (f) Full video length"
+	echo -e "     (f) Full file length"
 	echo -e "     (s) Short preview  [15s]"
 	echo -e "     (l) Long preview  [60s]"
 	echo -e ""
@@ -274,7 +271,19 @@ do
 	echo -e " "
 	echo -e "........................Processing "$f" ...to... $outfile" | tee -a $logfile
 	echo -e ".\n.\n.\n." >> $logfile
-    ffmpeg -y -hide_banner  -i "$f"  $arg4 $arg1 $afilt $arg2 $arg3 -metadata encoded_by="$m_encoded_by" -metadata copyright="$m_copyright" -metadata encoder="$m_encoder" "$outfile"
+	# first the file-analysis for double pass EBU R128, EXCLUDING SELECTED FILTERS  (in order to meet the exact EBU_R128 specs, the loudnorm should be again performed after applying the filters, but the audio also needs to be normalized before applying the compand filter in order to achieve predictable results....
+#    EBU_R128="loudnorm=I=-23:LRA=7:tp=-1"
+     EBU_R128="loudnorm=I=-16:LRA=11:tp=-4"
+	 ffmpeg -hide_banner -nostats -i "$f" -af $EBU_R128:print_format=json -f null - 2> ffmpeg.log
+	 tail -n 12 ffmpeg.log > ffmpeg.json
+	 jq_i=`jq '.input_i' ffmpeg.json | sed 's/\"//g'`
+	 jq_tp=`jq '.input_tp' ffmpeg.json | sed 's/\"//g'`
+	 jq_lra=`jq '.input_lra' ffmpeg.json | sed 's/\"//g'`
+	 jq_thres=`jq '.input_thresh' ffmpeg.json | sed 's/\"//g'`
+	 jq_offs=`jq '.target_offset' ffmpeg.json | sed 's/\"//g'`
+    EBU_R128=$EBU_R128":measured_I=$jq_i:measured_LRA=$jq_lra:measured_tp=$jq_tp:measured_thresh=$jq_thres:offset=$jq_offs"
+    afilt=$EBU_R128$afilt
+    ffmpeg -y -hide_banner  -i "$f"  $arg4 $arg1 -af $afilt $arg2 $arg3 -metadata encoded_by="$m_encoded_by" -metadata copyright="$m_copyright" -metadata encoder="$m_encoder" "$outfile"
 done
 
 
