@@ -10,7 +10,7 @@ m_encoder='ffmpeg'
 clear
 
 # Define constants
-scriptv="v0.97b"
+scriptv="v0.97c"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"audconv.rep"
@@ -182,6 +182,7 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 	echo -e "\n"
 	read -p "      Enhance audio? (y/n): " answer_crystalizer
 	echo -e "\n"
+	echo -e "\n"
 
     if [ $answer_crystalizer = "y" ]; then
         afilt=$afilt",crystalizer"
@@ -223,6 +224,7 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 	# ... select METADATA.........................................................................................
 	echo -e "\n"
 	read -p "      Copy METADATA? (y/n): " include_meta
+	echo -e "\n"
 	echo -e "\n"
 
     arg3=""
@@ -272,7 +274,7 @@ do
 	echo -e " "
 	echo -e "........................Processing "$f" ...to... $outfile" | tee -a $logfile
 	echo -e ".\n.\n.\n." >> $logfile
-    ffmpeg -y -hide_banner  -i "$f"  $arg4 $arg1 $afilt $arg2 $arg3 -metadata encoded_by=$m_encoded_by -metadata copyright=$m_copyright -metadata encoder=$m_encoder "$outfile"
+    ffmpeg -y -hide_banner  -i "$f"  $arg4 $arg1 $afilt $arg2 $arg3 -metadata encoded_by="$m_encoded_by" -metadata copyright="$m_copyright" -metadata encoder="$m_encoder" "$outfile"
 done
 
 
