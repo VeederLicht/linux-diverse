@@ -10,7 +10,7 @@ m_comment='-'
 clear
 
 # Define constants
-scriptv="v0.96"
+scriptv="v0.97"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"audconv.rep"
@@ -148,9 +148,9 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 	# ... select noise reduction.........................................................................................
 	echo -e "      SELECT NOISE CONTROL "
 	echo -e "     (n) none"
-	echo -e "     (l) low cut"
-	echo -e "     (m) medium (afftdn)"
-	echo -e "     (s) lc + afftdn + isolate voice"
+	echo -e "     (l) low (soft noise gate)"
+	echo -e "     (m) medium (ng+afftdn)"
+	echo -e "     (s) strong (ng+afftdn+lp+hp)"
 	echo -e ""
 	read -p "      --> " answer_noise
 	echo -e ""
@@ -162,13 +162,13 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
         afilt=$EBU_R128""
 		;;
 	  "l")
-        afilt=$EBU_R128",compand=attacks=.05=decays=.05:points=-60/-100|-45/-65|-35/-30|-20/-20|20/20"
+        afilt=$EBU_R128",compand=attacks=.05=decays=.05:points=-60/-200|-40/-65|-30/-27|-20/-20|20/20"
 		;;
 	  "m")
-        afilt=$EBU_R128",afftdn=nf=-40:nr=8"
+        afilt=$EBU_R128",compand=attacks=.05=decays=.05:points=-60/-200|-40/-65|-30/-27|-20/-20|20/20,afftdn=nf=-40:nr=8"
 		;;
 	  "s")
-        afilt=$EBU_R128",compand=attacks=.05=decays=.05:points=-60/-100|-45/-65|-35/-30|-20/-20|20/20,afftdn=nf=-25:nr=10,highpass=f=200,lowpass=f=3000"
+        afilt=$EBU_R128",compand=attacks=.05=decays=.05:points=-60/-200|-40/-65|-30/-27|-20/-20|20/20,afftdn=nf=-25:nr=10,highpass=f=150,lowpass=f=3500"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
