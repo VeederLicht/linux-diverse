@@ -10,7 +10,7 @@ m_encoder='ffmpeg'
 clear
 
 # Define constants
-scriptv="v0.99"
+scriptv="v1.0"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"audconv.rep"
@@ -94,17 +94,17 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
         case $answer_quality in
           "l")
                 arg0b="[lq-"
-                arg1="-c:a libopus -b:a 40k -ar 24000 -ac 1 -vbr on -compression_level 10 -frame_duration 40"
+                arg1="-c:a libopus -b:a 40k -ar 24000 -ac 1"
             ;;
 
           "m")
                 arg0b="[mq-"
-                arg1="-c:a libopus -b:a 80k -ar 48000 -vbr on -compression_level 10"
+                arg1="-c:a libopus -b:a 80k -ar 48000"
             ;;
 
           "h")
                 arg0b="[hq-"
-                arg1="-c:a libopus -b:a 160k -ar 48000 -vbr on -compression_level 10"
+                arg1="-c:a libopus -b:a 160k -ar 48000"
             ;;
         esac
         arg0a="ogg"
@@ -146,27 +146,24 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 
 
 	# ... select noise reduction.........................................................................................
-	echo -e "      SELECT NOISE CONTROL "
+	echo -e "      SELECT NOISE SUPPRESSION "
 	echo -e "     (n) none"
-	echo -e "     (l) low (soft noise gate)"
-	echo -e "     (m) medium (ng+afftdn)"
-	echo -e "     (s) strong (ng+afftdn+lp+hp)"
+	echo -e "     (l) light (gate)"
+	echo -e "     (s) strong (gate+anlmdn, slow!)"
 	echo -e ""
 	read -p "      --> " answer_noise
 	echo -e ""
 
+    afilt=""
+
 	case $answer_noise in
 	  "n")
-        afilt=""
 		;;
 	  "l")
-        afilt=",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20"
-		;;
-	  "m")
-        afilt=",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20,afftdn=nf=-35:nr=10"
+        afilt=",compand=attacks=.01=decays=.01:points=-65/-90|-30/-30|-20/-18|0/0"
 		;;
 	  "s")
-        afilt=",compand=attacks=.01=decays=.01:points=-60/-200|-40/-70|-30/-27|-20/-20|20/20,afftdn=nf=-25:nr=15,highpass=f=150,lowpass=f=3500"
+        afilt=",compand=attacks=.01=decays=.01:points=-45/-900|-25/-25|-15/-13|0/0,anlmdn=s=0.3:p=0.05:r=0.006"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
@@ -176,9 +173,38 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 
 
 
+	# ... select frequencies.........................................................................................
+	echo -e "      SELECT FREQUENCY CUTOUT:"
+	echo -e "     (n) none"
+	echo -e "     (l) low frequencies (<200Hz)"
+	echo -e "     (h) high frequencies (>3500Hz)"
+	echo -e "     (b) both (voice isolation)"
+	echo -e ""
+	read -p "      --> " answer_noise
+	echo -e ""
+
+	case $answer_noise in
+	  "n")
+		;;
+	  "l")
+        afilt=",highpass=f=200"$afilt
+		;;
+	  "h")
+        afilt=",lowpass=f=3500"$afilt
+		;;
+	  "b")
+        afilt=",highpass=f=150,lowpass=f=3500"$afilt
+		;;
+	  *)
+		echo "Unknown option, exiting..."
+		exit 3
+		;;
+	esac
+
+
 	# ... select crystalizer .........................................................................................
 	echo -e "\n"
-	read -p "      Enhance audio? (y/n): " answer_crystalizer
+	read -p "      Enhance audio clarity? (y/n): " answer_crystalizer
 	echo -e "\n"
 	echo -e "\n"
 
@@ -190,50 +216,34 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 
 
 
-	# ... select audio type.........................................................................................
-	
-	echo -e "      SELECT AUDIO TYPE:"
-	echo -e "\n"
-	echo -e "     (m) music"
-	echo -e "     (v) voice"
-	echo -e ""
-	read -p "      --> " answer_type
-	echo -e ""
-
-	case $answer_type in
-	  "m")
-        arg2="-application audio"
-		;;
-	  "v")
-        arg2="-application voip"
-		;;
-	  *)
-		echo "Unknown option, exiting..."
-		exit 3
-		;;
-	esac
-    echo -e "  ----------------[ $arg2 ] \n" >> $logfile
-
-
-
-
-
-	# ... select METADATA.........................................................................................
-	echo -e "\n"
-	read -p "      Copy METADATA? (y/n): " include_meta
-	echo -e "\n"
-	echo -e "\n"
-
-    arg3=""
-    if [ $include_meta = "y" ]; then
-        arg3="-map_metadata 0 -id3v2_version 3"
-    fi
-    echo -e "  ----------------[ $arg3 ] \n" >> $logfile
+# 	... select audio type.........................................................................................
+#
+# 	echo -e "      SELECT AUDIO TYPE:"
+# 	echo -e "\n"
+# 	echo -e "     (m) music"
+# 	echo -e "     (v) voice"
+# 	echo -e ""
+# 	read -p "      --> " answer_type
+# 	echo -e ""
+#
+# 	case $answer_type in
+# 	  "m")
+#         arg2="-application audio"
+# 		;;
+# 	  "v")
+#         arg2="-application voip"
+# 		;;
+# 	  *)
+# 		echo "Unknown option, exiting..."
+# 		exit 3
+# 		;;
+# 	esac
+#     echo -e "  ----------------[ $arg2 ] \n" >> $logfile
 
 
 
 
-    	# ... select length.........................................................................................
+   	# ... select length.........................................................................................
 	echo -e "      SELECT LENGTH: "
 	echo -e "     (f) Full file length"
 	echo -e "     (s) Short preview  [15s]"
@@ -263,14 +273,34 @@ echo -e "  -------------------------------------audconv.sh $scriptv logfile-----
 
 
 
+
+
+	# ... select METADATA.........................................................................................
+	echo -e "\n"
+	read -p "      Copy METADATA? (y/n): " include_meta
+	echo -e "\n"
+	echo -e "\n"
+
+    arg3=""
+    if [ $include_meta = "y" ]; then
+        arg3="-map_metadata 0 -id3v2_version 3"
+    fi
+    echo -e "  ----------------[ $arg3 ] \n" >> $logfile
+
+
+
+
+
 # LET'S GET TO WORK
+
+afilt_original=$afilt
 
 for f in "$@"
 do
+    afilt=$afilt_original
     outfile="$f".$arg0b$arg5.$arg0a
-	echo -e " "
-	echo -e "........................Processing "$f" ...to... $outfile" | tee -a $logfile
-	echo -e ".\n.\n.\n." >> $logfile
+	echo -e ""
+	echo -e "\n\n........................Processing "$f" ...to... $outfile" | tee -a $logfile
 	# first the file-analysis for double pass EBU R128, EXCLUDING SELECTED FILTERS  (in order to meet the exact EBU_R128 specs, the loudnorm should be again performed after applying the filters, but the audio also needs to be normalized before applying the compand filter in order to achieve predictable results....
 #    EBU_R128="loudnorm=I=-23:LRA=7:tp=-1"
      EBU_R128="loudnorm=I=-16:LRA=11:tp=-4"
@@ -283,6 +313,8 @@ do
 	 jq_offs=`jq '.target_offset' ffmpeg.json | sed 's/\"//g'`
     EBU_R128=$EBU_R128":measured_I=$jq_i:measured_LRA=$jq_lra:measured_tp=$jq_tp:measured_thresh=$jq_thres:offset=$jq_offs"
     afilt=$EBU_R128$afilt
+    echo -e "........................using filters: $afilt" | tee -a $logfile
+	echo -e ".\n.\n.\n." >> $logfile
     ffmpeg -y -hide_banner  -i "$f"  $arg4 $arg1 -af $afilt $arg2 $arg3 -metadata encoded_by="$m_encoded_by" -metadata copyright="$m_copyright" -metadata encoder="$m_encoder" "$outfile"
 done
 
