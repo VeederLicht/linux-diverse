@@ -10,7 +10,7 @@ m_comment=''
 clear
 
 # Define constants
-scriptv="v0.93b"
+scriptv="v0.98"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -118,6 +118,36 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 		;;
 	esac
     echo -e "  -----------------Convert to [ $arg0 ] with [ $arg9 ] \n" >> $logfile
+
+
+
+
+
+
+	# ... rename output
+	echo -e "      RENAME OUTPUT FILES?: "
+	echo -e "     (n) no"
+	echo -e "     (c) custom text"
+	echo -e ""
+	read -p "      --> " answer_rename
+	echo -e ""
+
+
+	case $answer_rename in
+	  "n")
+            fname=""
+		;;
+	  "c")
+            read -p "      Type your custum filename: " fname
+            echo -e ""
+		;;
+	  *)
+		echo "Unknown option, exiting..."
+		exit 3
+		;;
+	esac
+    echo -e "  ----------------[ $arg1 ]  \n" >> $logfile
+
 
 
 
@@ -276,9 +306,12 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 # LET'S GET TO WORK
 
+counter=1
+
 for f in "$@"
 do
-    outfile="$f".$arg0
+    if [ $fname = "" ]; then outfile="$f".$arg0; else outfile="$fname"[$counter].$arg0; fi
+    counter=$((counter+1))
 	echo -e " "
 	echo -e "........................Processing "$f"...to...$outfile................"
 	echo -e ".\n.\n.\n." >> $logfile
