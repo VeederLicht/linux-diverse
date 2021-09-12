@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.17"
+scriptv="v1.17b"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -103,7 +103,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	  "1")
         echo -e "  -----------------Postprocess/finalize (AV1 / libsvt) \n" >> $logfile
         arg0="-vf format=yuv420p"
-		arg1=",setsar=sar=1/1,unsharp=3:3:0.9,eq=contrast=1.01 -c:v libsvtav1 -c:a libopus -b:a 128k"
+		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libsvtav1 -c:a libopus -b:a 128k"
 		arg2=""
 		arg3="-av1]"
         arg10=".webm"
@@ -111,7 +111,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	  "4")
         echo -e "  -----------------Postprocess/finalize (H264) \n" >> $logfile
         arg0="-vf format=yuv420p"
-		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1 -c:v libx264 -c:a aac -b:a 192k"
+		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libx264 -c:a aac -b:a 192k"
 		arg2=""
 		arg3="-h264]"
         arg10=".mp4"
@@ -205,17 +205,17 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	    case $qal in
 	      "h")
             echo -e "  -----------------High quality output \n" >> $logfile
-            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 28 -preset 6"; else arg12="-b:v 0 -crf 20 -preset:v slow -profile:v high"; fi
+            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 28 -preset 5"; else arg12="-b:v 0 -crf 20 -preset:v slow -profile:v high"; fi
             arg3=".[hq${arg3}"
 		    ;;
 	      "m")
             echo -e "  -----------------Medium quality output \n" >> $logfile
-            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 42 -preset 7"; else arg12="-b:v 0 -crf 26 -preset:v fast -profile:v high"; fi
+            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 38 -preset 6"; else arg12="-b:v 0 -crf 26 -preset:v fast -profile:v high"; fi
             arg3=".[mq${arg3}"
 		    ;;
 	      *)
             echo -e "  -----------------Low quality output \n" >> $logfile
-            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 50 -preset 8"; else arg12="-b:v 0 -crf 32 -preset:v veryfast -profile:v main"; fi
+            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 48 -preset 7"; else arg12="-b:v 0 -crf 32 -preset:v veryfast -profile:v main"; fi
             arg3=".[lq${arg3}"
 		    ;;
 	    esac
