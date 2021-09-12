@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.16"
+scriptv="v1.17"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -206,17 +206,17 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	      "h")
             echo -e "  -----------------High quality output \n" >> $logfile
             if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 28 -preset 6"; else arg12="-b:v 0 -crf 20 -preset:v slow -profile:v high"; fi
-            arg3=".[high${arg3}"
+            arg3=".[hq${arg3}"
 		    ;;
 	      "m")
             echo -e "  -----------------Medium quality output \n" >> $logfile
-            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 45 -preset 7"; else arg12="-b:v 0 -crf 28 -preset:v fast -profile:v main"; fi
-            arg3=".[medium${arg3}"
+            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 42 -preset 7"; else arg12="-b:v 0 -crf 26 -preset:v fast -profile:v high"; fi
+            arg3=".[mq${arg3}"
 		    ;;
 	      *)
             echo -e "  -----------------Low quality output \n" >> $logfile
             if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 50 -preset 8"; else arg12="-b:v 0 -crf 32 -preset:v veryfast -profile:v main"; fi
-            arg3=".[low${arg3}"
+            arg3=".[lq${arg3}"
 		    ;;
 	    esac
 
