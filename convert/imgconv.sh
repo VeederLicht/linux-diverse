@@ -10,7 +10,7 @@ m_comment=''
 clear
 
 # Define constants
-scriptv="v0.98"
+scriptv="v1.0"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -171,7 +171,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
         arg1=""
 		;;
 	  "l")
-        arg1="-bilateral-blur 3"
+        arg1="-bilateral-blur 2"
 		;;
 	  "m")
         arg1="-wavelet-denoise 1%"
@@ -180,7 +180,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
         arg1="-enhance"
 		;;
 	  "v")
-        arg1="-despeckle"
+        arg1="-bilateral-blur 3 -despeckle"
 		;;
 	  "c")
         arg1="-kuwahara 4"
@@ -310,7 +310,7 @@ counter=1
 
 for f in "$@"
 do
-    if [ $fname = "" ]; then outfile="$f".$arg0; else outfile="$fname"[$counter].$arg0; fi
+    if [[ $fname = "" ]]; then outfile="$f".$arg0; else outfile="$fname"[$counter].$arg0; fi
     counter=$((counter+1))
 	echo -e " "
 	echo -e "........................Processing "$f"...to...$outfile................"
