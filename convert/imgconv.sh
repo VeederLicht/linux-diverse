@@ -10,7 +10,7 @@ m_comment=''
 clear
 
 # Define constants
-scriptv="v1.1"
+scriptv="v1.15"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -49,6 +49,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 	echo -e "     (1) Convert to AVIF (av1, no support for metadata)"
 	echo -e "     (2) Convert to WEBP"
 	echo -e "     (3) Convert to HEIC"
+	echo -e "     (4) Convert to PNG"
 	echo -e ""
 	read -p "      --> " answer_format
 	echo -e ""
@@ -111,6 +112,10 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
                 arg9="-quality 100"
             ;;
         esac
+		;;
+		"4")
+        arg0="png"
+        arg9=""
 		;;
 	  *)
 		echo "Unknown option, exiting..."
