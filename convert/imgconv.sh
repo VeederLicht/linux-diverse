@@ -10,7 +10,7 @@ m_comment=''
 clear
 
 # Define constants
-scriptv="v1.0"
+scriptv="v1.1"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -18,7 +18,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "       Batch convert old video's, deinterlacing + deblocking + scaling, RickOrchard 2020, no copyright"
+echo -e "                 Batch convert (old) video's, degraining  + scaling, RickOrchard 2021, no copyright"
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
@@ -46,9 +46,9 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 	# ... select output format
 	echo -e "\n"
 	echo -e "      SELECT OUTPUT FORMAT: "
-	echo -e "     (a) Convert to avif (av1, no support for metadata)"
-	echo -e "     (w) Convert to webp"
-	echo -e "     (j) Convert to jpg"
+	echo -e "     (1) Convert to AVIF (av1, no support for metadata)"
+	echo -e "     (2) Convert to WEBP"
+	echo -e "     (3) Convert to HEIC"
 	echo -e ""
 	read -p "      --> " answer_format
 	echo -e ""
@@ -56,58 +56,58 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 	# ... select quality
 	echo -e "      SELECT QUALITY: "
-	echo -e "     (l) low quality"
-	echo -e "     (m) medium quality"
-	echo -e "     (h) high quality"
+	echo -e "     (1) low quality"
+	echo -e "     (2) medium quality"
+	echo -e "     (3) high quality"
 	echo -e ""
 	read -p "      --> " answer_quality
 	echo -e ""
 
 	case $answer_format in
-	  "a")
+	  "1")
         arg0="avif"
         case $answer_quality in
-          "l")
+          "1")
                 arg9="-quality 45"
             ;;
 
-          "m")
-                arg9="-quality 80"
+          "2")
+                arg9="-quality 75"
             ;;
 
-          "h")
+          "3")
                 arg9="-quality 100"
             ;;
         esac
 		;;
-	  "w")
+	  "2")
         arg0="webp"
         case $answer_quality in
-          "l")
+          "1")
                 arg9="-quality 50"
             ;;
 
-          "m")
+          "2")
                 arg9="-quality 90"
             ;;
 
-          "h")
+          "3")
                 arg9="-quality 100"
             ;;
         esac
 		;;
-	  "j")
-        arg0="jpg"
+	  "3")
+        arg0="heic"
         case $answer_quality in
-          "l")
+          "1")
+                arg9="-quality 35"
+            ;;
+
+          "2")
                 arg9="-quality 55"
             ;;
 
-          "m")
-                arg9="-quality 95"
-            ;;
-
-          "h")
+          "3")
                 arg9="-quality 100"
             ;;
         esac
@@ -126,18 +126,18 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 	# ... rename output
 	echo -e "      RENAME OUTPUT FILES?: "
-	echo -e "     (n) no"
-	echo -e "     (c) custom text"
+	echo -e "     (1) no"
+	echo -e "     (2) custom text"
 	echo -e ""
 	read -p "      --> " answer_rename
 	echo -e ""
 
 
 	case $answer_rename in
-	  "n")
+	  "1")
             fname=""
 		;;
-	  "c")
+	  "2")
             read -p "      Type your custum filename: " fname
             echo -e ""
 		;;
@@ -155,34 +155,30 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 	# ... select noise reduction
 	echo -e "\n"
 	echo -e "      SELECT DENOISING LEVEL: "
-	echo -e "     (n) none"
-	echo -e "     (l) light"
-	echo -e "     (m) medium"
-	echo -e "     (s) strong"
-	echo -e "     (v) very strong"
-	echo -e "     (c) cartoonize"
+	echo -e "     (1) none"
+	echo -e "     (2) light"
+	echo -e "     (3) medium"
+	echo -e "     (4) strong"
+	echo -e "     (5) cartoonize"
 	echo -e ""
 	read -p "      --> " answer_noise
 	echo -e ""
 
 	case $answer_noise in
-	  "n")
+	  "1")
         echo -e "  -----------------No noise reduction \n" >> $logfile
         arg1=""
 		;;
-	  "l")
-        arg1="-bilateral-blur 2"
-		;;
-	  "m")
+	  "2")
         arg1="-wavelet-denoise 1%"
 		;;
-	  "s")
+	  "3")
         arg1="-enhance"
 		;;
-	  "v")
-        arg1="-bilateral-blur 3 -despeckle"
+	  "4")
+        arg1="-bilateral-blur 2 -despeckle"
 		;;
-	  "c")
+	  "5")
         arg1="-kuwahara 4"
 		;;
 	  *)
@@ -197,26 +193,26 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 	# ... select sharpening
 	echo -e "      SELECT SHARPENING LEVEL: "
-	echo -e "     (n) none"
-	echo -e "     (l) light"
-	echo -e "     (m) medium"
-	echo -e "     (s) strong"
+	echo -e "     (1) none"
+	echo -e "     (2) light"
+	echo -e "     (3) medium"
+	echo -e "     (4) strong"
 	echo -e ""
 	read -p "      --> " answer_sharpen
 	echo -e ""
 
 	case $answer_sharpen in
-	  "n")
+	  "1")
         arg2=""
 		;;
-	  "l")
-        arg2="-adaptive-sharpen 1"
-		;;
-	  "m")
+	  "2")
         arg2="-adaptive-sharpen 2"
 		;;
-	  "s")
-        arg2="-unsharp 1"
+	  "3")
+        arg2="-adaptive-sharpen 3"
+		;;
+	  "4")
+        arg2="-unsharp 1 -adaptive-sharpen 2"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
@@ -231,30 +227,30 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 	# ... select resize
 	echo -e "      SELECT RESIZING: "
-	echo -e "     (n) no, keep original"
-	echo -e "     (s) small, max 640p"
-	echo -e "     (h) HD, max 1280p"
-	echo -e "     (2) 2K, max 2560p"
-	echo -e "     (4) 4K, max 3840p"
+	echo -e "     (1) no, keep original"
+	echo -e "     (2) small, max 640p"
+	echo -e "     (3) HD, max 1280p"
+	echo -e "     (4) 2K, max 2560p"
+	echo -e "     (5) 4K, max 3840p"
 	echo -e ""
 	read -p "      --> " answer_size
 	echo -e ""
 
 	case $answer_size in
-	  "n")
+	  "1")
         arg3=""
 		;;
-	  "s")
-        arg3="-resize 640x640 -filter Lanczos"
-		;;
-	  "h")
-        arg3="-resize 1280x1280 -filter Lanczos"
-		;;
 	  "2")
-        arg3="-resize 2560x2560 -filter Lanczos"
+        arg3="-resize 640x640 -filter Point"
+		;;
+	  "3")
+        arg3="-resize 1280x1280 -filter Point"
 		;;
 	  "4")
-        arg3="-resize 3840x3840 -filter Lanczos"
+        arg3="-resize 2560x2560 -filter Point"
+		;;
+	  "5")
+        arg3="-resize 3840x3840 -filter Point"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
@@ -268,22 +264,26 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 
 	# ... select contrast
-	echo -e "      SELECT CONTRAST NORMALIZATION"
-	echo -e "     (n) none, keep original"
-	echo -e "     (N) natural"
-	echo -e "     (M) mathematic"
+	echo -e "      SELECT CONTRAST ENHANCEMENT"
+	echo -e "     (1) none, keep original"
+	echo -e "     (2) normalize"
+	echo -e "     (3) normalize+"
+	echo -e "     (4) mathematic (special)"
 	echo -e ""
 	read -p "      --> " answer_contrast
 	echo -e ""
 
 	case $answer_contrast in
-	  "n")
+	  "1")
         arg4=""
 		;;
-	  "N")
+	  "2")
         arg4="-normalize"
 		;;
-	  "M")
+	  "3")
+        arg4="-sigmoidal-contrast 2x55% -modulate 100,90 -normalize"
+		;;
+	  "4")
         arg4="-auto-level"
 		;;
 	  *)
@@ -315,7 +315,7 @@ do
 	echo -e " "
 	echo -e "........................Processing "$f"...to...$outfile................"
 	echo -e ".\n.\n.\n." >> $logfile
-    magick "$f" -auto-orient $arg1 $arg2 $arg3 $arg4 $arg9 -verbose "$outfile"
+    convert "$f" -auto-orient $arg1 $arg2 $arg3 $arg4 $arg9 -verbose "$outfile"
     if [ $include_meta = "y" ]; then
         exiv2 -ea- "$f" | exiv2 -ia- "$outfile" &>> $logfile
     fi
