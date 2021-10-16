@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.17b"
+scriptv="v1.25"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -46,83 +46,83 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 
 	# ... select source format
 	echo -e "\n"
-	echo -e "     (a) Preprocess (sar 1/1), original ratio, no crop"
-	echo -e "     (b) Preprocess to 4/3 (sar 1/1), no crop"
-	echo -e "     (c) Preprocess to 16/9 (sar 1/1), no crop"
-	echo -e "     (d) Preprocess to 16/9 (sar 1/1), crop to (3/2)"
+	echo -e "     (o) Preprocess, original ratio  (sar 1/1)"
+	echo -e "     (v) Preprocess, VHS 4:3  (sar 1/1)"
+	echo -e "     (d) Preprocess, Double8 11:8  (sar 1/1)"
+	echo -e "     (s) Preprocess, Super8 13:9  (sar 1/1)"
 	echo -e "     (1) Postprocess/finalize (AV1)"
 	echo -e "     (4) Postprocess/finalize (H264)"
 	echo -e "     (m) Change container to mp4"
+	echo -e "     (a) Extract audio track"
 	echo -e ""
 	read -p "      Select profile: " answer1
 	echo -e ""
 
 	case $answer1 in
-	  "a")
-        echo -e "  -----------------Preprocess (sar 1/1), original ratio, no crop \n" >> $logfile
-        arg0="-vf format=yuv420p"
+	  "o")
+	        echo -e "  -----------------Preprocess (sar 1/1), original ratio, no crop \n" >> $logfile
+	        arg0="-vf format=yuv420p"
 #		arg1=",setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
-		arg1=",setsar=sar=1/1 -c:v libx264 ${metadata_inject} -intra -preset:v slow -profile:v high -crf 17 -c:a aac -b:a 256k"
+		arg1=",setsar=sar=1/1 -c:v libx264 ${metadata_inject} -intra -preset:v slow -profile:v high -crf 15 -tune grain -c:a aac -b:a 256k"
 		arg2="[ori]"
 		arg3=".h264"
-        arg10=".m4v"
- 
+	        arg10=".m4v"
 		;;
-	  "b")
-        echo -e "  -----------------Preprocess to 4/3 (sar 1/1), no crop \n" >> $logfile
-        arg0="-vf format=yuv420p"
-		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -c:a aac -b:a 256k"
+	  "v")
+        	echo -e "  -----------------Preprocess, VHS 4:3  (sar 1/1) \n" >> $logfile
+	        arg0="-vf format=yuv420p"
+		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 15 -tune grain -c:a aac -b:a 256k"
 		arg2=."[4.3]"
 		arg3=".[h264]"
-        arg10=".m4v"
-		;;
-	  "c")
-        echo -e "  -----------------Preprocess to 16/9 (sar 1/1), no crop \n" >> $logfile
-        arg0="-vf format=yuv420p"
-		arg1=",scale=ih*(16/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -c:a aac -b:a 256k"
-		arg2=".[16.9]"
-		arg3=".[h264]"
-        arg10=".m4v"
+        	arg10=".m4v"
 		;;
 	  "d")
-        echo -e "  -----------------Preprocess to 16/9 (sar 1/1), crop to (3/2) \n" >> $logfile
-        arg0="-vf format=yuv420p"
-		arg1=",scale=ih*(16/9):ih:sws_flags=lanczos,setsar=sar=1/1,crop=ih*(3/2):ih -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -c:a aac -b:a 256k"
-		arg2=".[3.2]"
+        	echo -e "  -----------------Preprocess, Double8 11:8  (sar 1/1) \n" >> $logfile
+        	arg0="-vf format=yuv420p"
+		arg1=",scale=ih*(11/8):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 15 -tune grain -c:a aac -b:a 256k"
+		arg2=".[11.8]"
 		arg3=".[h264]"
-        arg10=".m4v"
+        	arg10=".m4v"
 		;;
-#	  "1")
-#        echo -e "  -----------------Postprocess/finalize (AV1 / libaom) \n" >> $logfile
-#        arg0="-vf format=yuv420p"
-#		arg1=",setsar=sar=1/1,unsharp=3:3:0.5,unsharp=5:5:0.1 -c:v libaom-av1 -g 32 -keyint_min 32 -sc_threshold 0 -row-mt 1 -tiles 2x2 -cpu-used 5 -denoise-noise-level 0 -arnr-strength 0 -crf 30 -b:v 0 -c:a libopus -b:a 128k"
-#		arg2=""
-#		arg3=".[av1]"
-#        arg10=".webm"
-#		;;
+	  "s")
+        	echo -e "  -----------------Preprocess, Super8 13:9 \n" >> $logfile
+        	arg0="-vf format=yuv420p"
+		arg1=",scale=ih*(13/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 15 -tune grain -c:a aac -b:a 256k"
+		arg2=".[13.9]"
+		arg3=".[h264]"
+        	arg10=".m4v"
+		;;
 	  "1")
-        echo -e "  -----------------Postprocess/finalize (AV1 / libsvt) \n" >> $logfile
-        arg0="-vf format=yuv420p"
+        	echo -e "  -----------------Postprocess/finalize (AV1 / libsvt) \n" >> $logfile
+        	arg0="-vf format=yuv420p"
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libsvtav1 -c:a libopus -b:a 128k"
 		arg2=""
 		arg3="-av1]"
-        arg10=".webm"
+        	arg10=".webm"
 		;;
 	  "4")
-        echo -e "  -----------------Postprocess/finalize (H264) \n" >> $logfile
-        arg0="-vf format=yuv420p"
+        	echo -e "  -----------------Postprocess/finalize (H264) \n" >> $logfile
+        	arg0="-vf format=yuv420p"
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libx264 -c:a aac -b:a 192k"
 		arg2=""
 		arg3="-h264]"
-        arg10=".mp4"
+        	arg10=".mp4"
 		;;
 	  "m")
-        echo -e "  -----------------Change container to mp4 \n" >> $logfile
-        arg0=""
+        	echo -e "  -----------------Change container to mp4 \n" >> $logfile
+        	arg0=""
 		arg1=" -c copy "
 		arg2=""
 		arg3=""
-        arg10=".mp4"
+        	arg10=".mp4"
+		;;
+	  "a")
+        	echo -e "  -----------------Extract audio track \n" >> $logfile
+        	arg0=""
+		arg1=" -vn "
+		arg2=""
+		arg3=""
+        	arg10=".wav"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
@@ -135,16 +135,21 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	  "a"|"b"|"c"|"d")
 	    # ... select deinterlacing
 	    echo -e "\n"
-	    echo -e "Note: in order for deinterlacing to work properly, the footage should be thouroughly deblocked"
+	    echo -e "Note: in order for deinterlacing to work properly, the footage should be thouroughly deblocked. Possible modes are 1 (frame per field, VHS and higher) or 0 (frame per frame, old film)"
 	    echo -e ""
-	    read -p "       Deïnterlace? (y/n)" deint
+	    read -p "       Deïnterlace? (1/0/n)" deint
 	    echo -e ""
 
 	    case $deint in
-	      "y")
-        echo -e "  -----------------Deinterlacing with bwdif \n" >> $logfile
-		    arg4=",bwdif"
-		    arg9="[bwd]"
+	      "1")
+        	echo -e "  -----------------Deinterlacing with yadif-1 \n" >> $logfile
+		    arg4=",yadif=mode=1"
+		    arg9="[yad1]"
+		    ;;
+    	      "0")
+        	echo -e "  -----------------Deinterlacing with yadif-0 \n" >> $logfile
+		    arg4=",yadif=mode=0"
+		    arg9="[yad0]"
 		    ;;
 	      "n")
 		    arg4=""
