@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.27"
+scriptv="v1.28"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -72,7 +72,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         	echo -e "  -----------------Preprocess, VHS 4:3  (sar 1/1) \n" >> $logfile
 	        arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
-		arg2=."[4.3]"
+		arg2=."[4x3]"
 		arg3=".[h264]"
         	arg10=".m4v"
 		;;
@@ -80,7 +80,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         	echo -e "  -----------------Preprocess, Double8 11:8  (sar 1/1) \n" >> $logfile
         	arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(11/8):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
-		arg2=".[11.8]"
+		arg2=".[11x8]"
 		arg3=".[h264]"
         	arg10=".m4v"
 		;;
@@ -88,7 +88,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         	echo -e "  -----------------Preprocess, Super8 13:9 \n" >> $logfile
         	arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(13/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
-		arg2=".[13.9]"
+		arg2=".[13x9]"
 		arg3=".[h264]"
         	arg10=".m4v"
 		;;
@@ -132,64 +132,72 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 
 
 	case $answer1 in
+
+    # IN CASE OF PREPROCESSING...
 	  "o"|"v"|"d"|"s")
 	    # ... select deinterlacing
 	    echo -e "\n"
-	    echo -e "Note: in order for deinterlacing to work properly, the footage should be thouroughly deblocked. Possible modes are 1 (frame per field, VHS and higher) or 0 (frame per frame, old film)"
+	    echo -e "Deinterlace?"
 	    echo -e ""
-	    read -p "       Deïnterlace? (1/0/n)" deint
+      echo -e "     (0) None"
+	    echo -e "     (1) 1 frame per FRAME"
+	    echo -e "     (2) 1 frame per FIELD"
+	    echo -e ""
+	    read -p "       Select Deïnterlacing: " deint
 	    echo -e ""
 
 	    case $deint in
-	      "1")
-        	echo -e "  -----------------Deinterlacing with yadif-1 \n" >> $logfile
+        "0")
+        arg4=""
+        arg9=""
+        ;;
+        "1")
+        echo -e "  -----------------Deinterlacing with yadif-0 \n" >> $logfile
+        arg4=",yadif=mode=0"
+        arg9="[yad0]"
+        ;;
+	      "2")
+        echo -e "  -----------------Deinterlacing with yadif-1 \n" >> $logfile
 		    arg4=",yadif=mode=1"
 		    arg9="[yad1]"
-		    ;;
-    	      "0")
-        	echo -e "  -----------------Deinterlacing with yadif-0 \n" >> $logfile
-		    arg4=",yadif=mode=0"
-		    arg9="[yad0]"
-		    ;;
-	      "n")
-		    arg4=""
-		    arg9=""
 		    ;;
 	    esac
 
 	    # ... select deblocking
 	    echo -e "\n"
-	    echo -e "     (n) None"
-	    echo -e "     (l) Low"
-	    echo -e "     (m) Medium"
-	    echo -e "     (h) High"
-	    echo -e "     (v) Very high"
+	    echo -e "Note: in order for deinterlacing to work properly, it helps to deblock the footage."
+	    echo -e ""
+	    echo -e "     (0) None"
+	    echo -e "     (1) Low (high quality)"
+	    echo -e "     (2) Medium"
+	    echo -e "     (3) High"
+	    echo -e "     (4) Extreme"
 	    echo -e ""
 	    read -p "       Select deblocking/denoising level: " deblock
 	    echo -e ""
 
 	    case $deblock in
-	      "n")
+	      "0")
 		    arg5=""
 		    arg8=""
 		    ;;
-	      "l")
-            echo -e "  -----------------Low strength deblocking/denoising \n" >> $logfile
-		    arg5=",bm3d=sigma=2"
+	      "1")
+            echo -e "  -----------------Low strength deblocking \n" >> $logfile
+		    arg5=",bm3d=sigma=3"
 		    arg8="[bm2]"
 		    ;;
-		    "m")
+		    "2")
             echo -e "  -----------------Medium strength deblocking/denoising \n" >> $logfile
-		    arg5=",spp=3:1:mode=soft,"
-		    arg8="[3_1]"
+		    arg5=",spp=2:1:mode=soft"
+		    arg8="[2_1]"
 		    ;;
-		    "h")
+		    "3")
             echo -e "  -----------------High strength deblocking/denoising \n" >> $logfile
 		    arg5=",spp=3:2:mode=soft"
 		    arg8="[3_2]"
 		    ;;
-		    "v")
-            echo -e "  -----------------Very high strength deblocking/denoising \n" >> $logfile
+		    "4")
+            echo -e "  -----------------Extreme strength deblocking/denoising \n" >> $logfile
 		    arg5=",spp=4:3:mode=soft"
 		    arg8="[4_3]"
 		    ;;
@@ -200,6 +208,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	    esac
         ;;
 
+    # IN CASE OF FINAL OUTPUT...
 	  "1"|"4")
 	    # ... select quality
 	    echo -e "\n"
