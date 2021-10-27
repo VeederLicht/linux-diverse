@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.28"
+scriptv="v1.29"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
