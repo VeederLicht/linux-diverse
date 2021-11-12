@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.29"
+scriptv="v1.31"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -60,69 +60,82 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 
 	case $answer1 in
 	  "o")
-	        echo -e "  -----------------Preprocess (sar 1/1), original ratio, no crop \n" >> $logfile
-	        arg0="-vf format=yuv420p"
+		echo -e "  -----------------Preprocess (sar 1/1), original ratio, no crop \n" >> $logfile
+		arg0="-vf format=yuv420p"
 #		arg1=",setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
 		arg1=",setsar=sar=1/1 -c:v libx264 ${metadata_inject} -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
 		arg2="[ori]"
 		arg3=".h264"
-	        arg10=".m4v"
+		arg10=".m4v"
 		;;
 	  "v")
-        	echo -e "  -----------------Preprocess, VHS 4:3  (sar 1/1) \n" >> $logfile
-	        arg0="-vf format=yuv420p"
+		echo -e "  -----------------Preprocess, VHS 4:3  (sar 1/1) \n" >> $logfile
+		arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
 		arg2=."[4x3]"
 		arg3=".[h264]"
-        	arg10=".m4v"
+		arg10=".m4v"
 		;;
 	  "d")
-        	echo -e "  -----------------Preprocess, Double8 11:8  (sar 1/1) \n" >> $logfile
-        	arg0="-vf format=yuv420p"
+		echo -e "  -----------------Preprocess, Double8 11:8  (sar 1/1) \n" >> $logfile
+		arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(11/8):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
 		arg2=".[11x8]"
 		arg3=".[h264]"
-        	arg10=".m4v"
+		arg10=".m4v"
 		;;
 	  "s")
-        	echo -e "  -----------------Preprocess, Super8 13:9 \n" >> $logfile
-        	arg0="-vf format=yuv420p"
+		echo -e "  -----------------Preprocess, Super8 13:9 \n" >> $logfile
+		arg0="-vf format=yuv420p"
 		arg1=",scale=ih*(13/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
 		arg2=".[13x9]"
 		arg3=".[h264]"
-        	arg10=".m4v"
+		arg10=".m4v"
 		;;
 	  "1")
-        	echo -e "  -----------------Postprocess/finalize (AV1 / libsvt) \n" >> $logfile
-        	arg0="-vf format=yuv420p"
-		arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libsvtav1 -c:a libopus -b:a 128k"
+		echo -e ""
+		echo -e "     (s) libsvtav1"
+		echo -e "     (a) libaom-av1"
+		echo -e ""
+		read -p "       Select encoder: " encoder
+		echo -e ""
+
+		if [ "$encoder" = "a" ]; then
+			arg1=",setsar=sar=1/1,unsharp=3:3:0.5,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libaom-av1 -c:a libopus -b:a 128k"
+			encoder="libaom-av1"
+		else
+			arg1=",setsar=sar=1/1,unsharp=3:3:0.7,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libsvtav1 -c:a libopus -b:a 128k"
+			encoder="libsvtav1"
+		fi
+		echo -e "  -----------------Postprocess/finalize (AV1 / $encoder) \n" >> $logfile
+		arg0="-vf format=yuv420p"
 		arg2=""
 		arg3="-av1]"
-        	arg10=".webm"
+        arg10=".webm"
 		;;
 	  "4")
-        	echo -e "  -----------------Postprocess/finalize (H264) \n" >> $logfile
-        	arg0="-vf format=yuv420p"
+		echo -e "  -----------------Postprocess/finalize (H264) \n" >> $logfile
+		arg0="-vf format=yuv420p"
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libx264 -c:a aac -b:a 192k"
 		arg2=""
 		arg3="-h264]"
-        	arg10=".mp4"
+		arg10=".mp4"
 		;;
 	  "m")
-        	echo -e "  -----------------Change container to mp4 \n" >> $logfile
-        	arg0=""
+		echo -e "  -----------------Change container to mp4 \n" >> $logfile
+		arg0=""
 		arg1=" -c copy "
 		arg2=""
 		arg3=""
-        	arg10=".mp4"
+		arg10=".mp4"
 		;;
 	  "a")
-        	echo -e "  -----------------Extract audio track \n" >> $logfile
-        	arg0=""
+		echo -e "  -----------------Extract audio track \n" >> $logfile
+		arg0=""
 		arg1=" -vn "
 		arg2=""
 		arg3=""
-        	arg10=".wav"
+		arg10=".wav"
 		;;
 	  *)
 		echo "Unknown option, exiting..."
@@ -139,7 +152,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	    echo -e "\n"
 	    echo -e "Deinterlace?"
 	    echo -e ""
-      echo -e "     (0) None"
+      	echo -e "     (0) None"
 	    echo -e "     (1) 1 frame per FRAME"
 	    echo -e "     (2) 1 frame per FIELD"
 	    echo -e ""
@@ -219,18 +232,48 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	    case $qal in
 	      "h")
             echo -e "  -----------------High quality output \n" >> $logfile
-            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 28 -preset 6"; else arg12="-b:v 0 -crf 20 -preset:v slow -profile:v high"; fi
+			case $encoder in
+				"libsvtav1")
+					arg12="-b:v 0 -qp 28 -preset 6"
+					;;
+				"libaom-av1")
+					arg12="-crf 28 -cpu-used 7"
+					;;
+				*)
+					arg12="-b:v 0 -crf 20 -preset:v slow -profile:v high"
+					;;
+			esac
             arg3=".[hq${arg3}"
 		    ;;
 	      "m")
             echo -e "  -----------------Medium quality output \n" >> $logfile
-            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 38 -preset 7"; else arg12="-b:v 0 -crf 26 -preset:v fast -profile:v high"; fi
+			case $encoder in
+				"libsvtav1")
+					arg12="-b:v 0 -qp 38 -preset 7"
+					;;
+				"libaom-av1")
+					arg12="-crf 38 -cpu-used 7"
+					;;
+				*)
+					arg12="-b:v 0 -crf 25 -preset:v slow -profile:v high"
+					;;
+			esac
             arg3=".[mq${arg3}"
 		    ;;
 	      *)
             echo -e "  -----------------Low quality output \n" >> $logfile
-            if [ "$answer1" = "1" ]; then arg12="-b:v 0 -qp 48 -preset 8"; else arg12="-b:v 0 -crf 32 -preset:v veryfast -profile:v main"; fi
-            arg3=".[lq${arg3}"
+			case $encoder in
+				"libsvtav1")
+					arg12="-b:v 0 -qp 48 -preset 8"
+					;;
+				"libaom-av1")
+					arg12="-crf 48 -cpu-used 7"
+					;;
+				*)
+					arg12="-b:v 0 -crf 30 -preset:v fast -profile:v main"
+					;;
+			esac
+             arg3=".[lq${arg3}"
 		    ;;
 	    esac
 
