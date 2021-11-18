@@ -81,6 +81,13 @@ Q=56 && EXT="mov" && time for i in  *.${EXT}; do
 done
 ```
 
+
+#### C03. NVENC encoding, high quality!
+```
+ffmpeg.exe -i in.mov  -c:v h264_nvenc -rc constqp -qp 25 -b:v 0K -b:a 128k -preset slow -tune hq -profile:v high -metadata copyright="..." -metadata comment="..." -metadata title="..." -metadata year="..." out4.mp4
+```
+
+
 ### Effects
 
 #### C03. To apply letterbox/pillarbox, scaling to 1280x720
