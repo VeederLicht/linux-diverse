@@ -1,0 +1,18 @@
+# include the default.pa pulseaudio config file
+.include /etc/pulse/default.pa
+
+# null sink
+.ifexists module-null-sink.so
+load-module module-null-sink sink_name=Null1 sink_properties=device.description=VirtualSpeaker1
+load-module module-null-sink sink_name=Null2 sink_properties=device.description=VirtualSpeaker2
+.endif
+
+# virtual source
+.ifexists module-virtual-source.so
+load-module module-virtual-source source_name=VS1 master=Null1.monitor source_properties=device.description=VirtualMic1
+.endif
+
+# remap source
+.ifexists module-remap-source.so
+load-module module-remap-source source_name=RS1 master=Null2.monitor source_properties=device.description=VirtualMic2
+.endif
