@@ -1,4 +1,4 @@
-## PulseAudio config trick to add virtual microphones
+## PulseAudio config trick to add virtual microphones (virtual cables)
 
 1.  Add the file _default.pa_ to your **[home]/.config/pulse** folder
 
