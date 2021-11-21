@@ -10,7 +10,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.27"
+scriptv="v1.30"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"upblend.rep"
@@ -29,6 +29,8 @@ if [ $# -eq 0 ]
 	exit 2
 fi
 
+iStart=$(date +%s)
+
 mkdir -p ./upscaled
 mkdir -p ./blended
 
@@ -38,26 +40,25 @@ for f in "$@"
 # for f in *.png
 do
 
-	## Uncomment one or more of the upscaling methods below
+	## Uncomment one or more of the upscaling methods below, keep in mind that the memory requirements rise incrementally
 
 	## 1. IMAGEMAGICK, convert point generates the most detail but is better used with many exposure blends because of pixelated appearance
-		echo -e "\n"
-		echo -e -n "\e[0m »»» Upscaling using convert: \e[1m $f... \e[2m"
+#		echo -e "\n"
+#		echo -e -n "\e[0m »»» Upscaling using convert: \e[1m $f... \e[2m"
 #		time convert "$f" -filter point -resize "200%" "PNG24:./upscaled/${f}.up_convert_point.png"
-		time convert "$f" -sigmoidal-contrast 1x20% -sigmoidal-contrast 1x55% -modulate 100,85 -normalize -filter point -resize "200%" "./upscaled/${f}.up_convert_point.jpg"
+#		time convert "$f" -sigmoidal-contrast 1x20% -sigmoidal-contrast 1x55% -modulate 100,85 -normalize -filter point -resize "400%" "./upscaled/${f}.up_convert_point.jpg"
 
 
-	## 2. XBRZSCALE, enhanced edge upscaling
+	## 2. XBRZSCALE, upscaling using antialiasing
 #		echo -e "\n"
 #		echo -e "\e[0m »»» Upscaling using xbrzscale: \e[1m $f... \e[2m"
-#		time xbrzscale 2 "$f" "./upscaled/${f}.up_xbrzscale.png"
+#		time xbrzscale 4 "$f" "./upscaled/${f}.up_xbrzscale.png"
 
 
-	## 3. WAIFU2X, best overall (by far!)
+	## 3. WAIFU2X, best overall but slowest (GPU required)
 		echo -e "\n"
 		echo -e "\e[0m »»» Upscaling using waifu2x: \e[1m $f... \e[2m"
-#		time waifu2x-ncnn-vulkan -i "$f" -o "./upscaled/${f}.up_waifu2x.png"
-		time waifu2x-ncnn-vulkan -i "$f" -f jpg -n -1 -o "./upscaled/${f}.up_waifu2x.jpg"
+		time waifu2x-ncnn-vulkan -i "$f" -s 4 -f jpg -o "./upscaled/${f}.up_waifu2x.jpg"
 
 	#if [[ $1 == "--rename" ]]
 	#  then
@@ -74,13 +75,12 @@ done
 
 
 ## ENFUSE, blend all exposures together
-	echo "\n"
+	echo -e "\n"
 	echo -e "\e[0m »»» Blending multiple exposures using enfuse... \e[2m"
 	time enfuse --output="./blended/${f}#enfused.jpg" --compression=90 ./upscaled/*.jpg --verbose=0 --exposure-optimum=0.5 --exposure-width=0.1 --exposure-weight-function=gaussian
-	#time enfuse --output="./blended/blend_enfuse-${f}.png" ./upscaled/*.png
 
 ## EXIV2, copy EXIF data to new file
-	echo "\n"
+	echo -e "\n"
 	echo -e "\e[0m »»» Copying EXIF data to the new file... \e[2m"
 	exiv2 rm "./blended/${f}#enfused.jpg"
 	exiv2 -ea- "$f" | exiv2 -ia- "./blended/${f}#enfused.jpg"
@@ -91,5 +91,6 @@ done
 	
 #rm -Rf "./upscaled/*"
 
-
-echo -e "\n\n\n  \e[4mFinished!\e[0m \n\n\n"
+iEnd=$(date +%s)
+echo -e "\n \e[0m »»» Total processing time: $((iEnd-iStart)) seconds \e[2m"
+echo -e "\n\n \e[4mFinished!\e[0m \n\n\n"
