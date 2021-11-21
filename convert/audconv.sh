@@ -2,7 +2,7 @@
 
 
 # User information to inject in metadata
-m_encoded_by='Pink Pearl® Digital Media'
+m_encoded_by='Pink Pearl®'
 m_copyright=''
 m_encoder='ffmpeg'
 
@@ -10,7 +10,7 @@ m_encoder='ffmpeg'
 clear
 
 # Define constants
-scriptv="v1.0"
+scriptv="v1.01"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"audconv.rep"
@@ -18,7 +18,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"audconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "       Batch convert audio, with options.  RickOrchard 2021, no copyright"
+echo -e "       Batch convert audio, with options. Copyleft 2020 RickOrchard@Github""
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
