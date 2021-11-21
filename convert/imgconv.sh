@@ -10,7 +10,7 @@ m_comment=''
 clear
 
 # Define constants
-scriptv="v1.21"
+scriptv="v1.22"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -18,7 +18,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "                 Batch convert (old) video's, degraining  + scaling, RickOrchard 2021, no copyright"
+echo -e "            Batch convert images, with some options. Copyleft 2019 RickOrchard@Github""
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
