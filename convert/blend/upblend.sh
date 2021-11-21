@@ -10,7 +10,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.30"
+scriptv="v1.31"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"upblend.rep"
@@ -46,19 +46,19 @@ do
 #		echo -e "\n"
 #		echo -e -n "\e[0m »»» Upscaling using convert: \e[1m $f... \e[2m"
 #		time convert "$f" -filter point -resize "200%" "PNG24:./upscaled/${f}.up_convert_point.png"
-#		time convert "$f" -sigmoidal-contrast 1x20% -sigmoidal-contrast 1x55% -modulate 100,85 -normalize -filter point -resize "400%" "./upscaled/${f}.up_convert_point.jpg"
+#		time convert "$f" -sigmoidal-contrast 1x20% -sigmoidal-contrast 1x55% -modulate 100,85 -normalize -filter point -resize "200%" "./upscaled/${f}.up_convert_point.jpg"
 
 
 	## 2. XBRZSCALE, upscaling using antialiasing
 #		echo -e "\n"
 #		echo -e "\e[0m »»» Upscaling using xbrzscale: \e[1m $f... \e[2m"
-#		time xbrzscale 4 "$f" "./upscaled/${f}.up_xbrzscale.png"
+#		time xbrzscale 2 "$f" "./upscaled/${f}.up_xbrzscale.png"
 
 
 	## 3. WAIFU2X, best overall but slowest (GPU required)
 		echo -e "\n"
 		echo -e "\e[0m »»» Upscaling using waifu2x: \e[1m $f... \e[2m"
-		time waifu2x-ncnn-vulkan -i "$f" -s 4 -f jpg -o "./upscaled/${f}.up_waifu2x.jpg"
+		time waifu2x-ncnn-vulkan -i "$f" -s 2 -f jpg -o "./upscaled/${f}.up_waifu2x.jpg"
 
 	#if [[ $1 == "--rename" ]]
 	#  then
@@ -77,7 +77,7 @@ done
 ## ENFUSE, blend all exposures together
 	echo -e "\n"
 	echo -e "\e[0m »»» Blending multiple exposures using enfuse... \e[2m"
-	time enfuse --output="./blended/${f}#enfused.jpg" --compression=90 ./upscaled/*.jpg --verbose=0 --exposure-optimum=0.5 --exposure-width=0.1 --exposure-weight-function=gaussian
+	time enfuse --output="./blended/${f}#enfused.jpg" --compression=90 ./upscaled/*.jpg --verbose=0 --exposure-optimum=0.4 --exposure-width=0.1 --exposure-weight-function=gaussian
 
 ## EXIV2, copy EXIF data to new file
 	echo -e "\n"
