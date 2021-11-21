@@ -3,7 +3,7 @@
 
 # User information to inject in metadata
 m_composer=''
-m_copyright='©2021 Pink Pearl®'
+m_copyright='Pink Pearl®'
 m_comment='VIDEOTOOL: - & AUDIOTOOL: -'
 m_title=''
 m_year=''
@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.31"
+scriptv="v1.32"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -20,7 +20,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "       Batch process (old) video's, deinterlacing + deblocking + scaling. RickOrchard 2020, no copyright"
+echo -e "    Pre- and postprocess video's, deinterlacing + deblocking + scaling. Copyleft 2020 RickOrchard@Github""
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
