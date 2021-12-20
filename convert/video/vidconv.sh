@@ -3,7 +3,7 @@
 
 # User information to inject in metadata
 m_composer=''
-m_copyright='Pink Pearl®'
+m_copyright='©2021 Pink Pearl®'
 m_comment='VIDEOTOOL: - & AUDIOTOOL: -'
 m_title=''
 m_year=''
@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.32"
+scriptv="v1.36"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -20,7 +20,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "    Pre- and postprocess video's, deinterlacing + deblocking + scaling. Copyleft 2020 RickOrchard@Github""
+echo -e "       Batch process (old) video's, deinterlacing + deblocking + scaling. RickOrchard 2020, no copyright"
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
@@ -52,6 +52,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	echo -e "     (s) Preprocess, Super8 13:9  (sar 1/1)"
 	echo -e "     (1) Postprocess/finalize (AV1)"
 	echo -e "     (4) Postprocess/finalize (H264)"
+	echo -e "     (n) Nvenc convert (H264)"
 	echo -e "     (m) Change container to mp4"
 	echo -e "     (a) Extract audio track"
 	echo -e ""
@@ -119,6 +120,14 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg1=",setsar=sar=1/1,unsharp=3:3:0.3,unsharp=5:5:0.1,eq=contrast=1.01 -c:v libx264 -c:a aac -b:a 192k"
 		arg2=""
 		arg3="-h264]"
+		arg10=".mp4"
+		;;
+		"n")
+		echo -e "  -----------------Recompress/convert using NVENC (H264) \n" >> $logfile
+		arg0=""
+		arg1="-gpu 0 -c:v h264_nvenc -profile:v high -preset slow -2pass true"
+		arg2=""
+		arg3="[h264]"
 		arg10=".mp4"
 		;;
 	  "m")
