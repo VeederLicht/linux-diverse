@@ -3,8 +3,8 @@
 
 # User information to inject in metadata
 m_composer=''
-m_copyright='©2021 Pink Pearl®'
-m_comment='VIDEOTOOL: - & AUDIOTOOL: -'
+m_copyright=''
+m_comment='Converted with vidconv.sh (RickOrchard@Github)'
 m_title=''
 m_year=''
 
@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.36"
+scriptv="v1.39"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
@@ -68,6 +68,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg2="[ori]"
 		arg3=".h264"
 		arg10=".m4v"
+		arg13="-movflags frag_keyframe+empty_moov"
 		;;
 	  "v")
 		echo -e "  -----------------Preprocess, VHS 4:3  (sar 1/1) \n" >> $logfile
@@ -76,6 +77,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg2=."[4x3]"
 		arg3=".[h264]"
 		arg10=".m4v"
+		arg13="-movflags frag_keyframe+empty_moov"
 		;;
 	  "d")
 		echo -e "  -----------------Preprocess, Double8 11:8  (sar 1/1) \n" >> $logfile
@@ -84,6 +86,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg2=".[11x8]"
 		arg3=".[h264]"
 		arg10=".m4v"
+		arg13="-movflags frag_keyframe+empty_moov"
 		;;
 	  "s")
 		echo -e "  -----------------Preprocess, Super8 13:9 \n" >> $logfile
@@ -92,6 +95,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg2=".[13x9]"
 		arg3=".[h264]"
 		arg10=".m4v"
+		arg13="-movflags frag_keyframe+empty_moov"
 		;;
 	  "1")
 		echo -e ""
@@ -113,6 +117,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg2=""
 		arg3="-av1]"
         arg10=".webm"
+		arg13="-movflags +faststart"
 		;;
 	  "4")
 		echo -e "  -----------------Postprocess/finalize (H264) \n" >> $logfile
@@ -121,14 +126,16 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg2=""
 		arg3="-h264]"
 		arg10=".mp4"
+		arg13="-movflags +faststart"
 		;;
-		"n")
+	  "n")
 		echo -e "  -----------------Recompress/convert using NVENC (H264) \n" >> $logfile
 		arg0=""
 		arg1="-gpu 0 -c:v h264_nvenc -profile:v high -preset slow -2pass true"
 		arg2=""
 		arg3="[h264]"
 		arg10=".mp4"
+		arg13="-movflags +faststart"
 		;;
 	  "m")
 		echo -e "  -----------------Change container to mp4 \n" >> $logfile
@@ -137,6 +144,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg2=""
 		arg3=""
 		arg10=".mp4"
+		arg13="-movflags +faststart"
 		;;
 	  "a")
 		echo -e "  -----------------Extract audio track \n" >> $logfile
@@ -187,13 +195,13 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 
 	    # ... select deblocking
 	    echo -e "\n"
-	    echo -e "Note: in order for deinterlacing to work properly, it helps to deblock the footage."
+	    echo -e "Note: in order for deinterlacing to work properly on very grainy footage, it might help to deblock the footage."
 	    echo -e ""
 	    echo -e "     (0) None"
-	    echo -e "     (1) Low (high quality)"
-	    echo -e "     (2) Medium"
+	    echo -e "     (1) Low (high quality, slower)"
+	    echo -e "     (2) Medium (fast)"
 	    echo -e "     (3) High"
-	    echo -e "     (4) Extreme"
+	    echo -e "     (4) Extreme (very slow)"
 	    echo -e ""
 	    read -p "       Select deblocking/denoising level: " deblock
 	    echo -e ""
@@ -348,7 +356,7 @@ do
 	echo -e " "
 	echo -e "........................Processing "$f"...to...$outfile................"
 	echo -e ".\n.\n.\n." >> $logfile
-    time ffmpeg -hide_banner -nostats $arg6 -i "$f" $arg0$arg5$arg4$arg1 $arg12 $arg11 -movflags +faststart -metadata composer="$m_composer" -metadata copyright="$m_copyright" -metadata comment="$m_comment" -metadata title="$m_title" -metadata year="$m_year" "$outfile" -y &>> $logfile
+    time ffmpeg -hide_banner -nostats $arg6 -i "$f" $arg0$arg5$arg4$arg1 $arg12 $arg11 $arg13 -metadata composer="$m_composer" -metadata copyright="$m_copyright" -metadata comment="$m_comment" -metadata title="$m_title" -metadata year="$m_year" "$outfile" -y &>> $logfile
 done
 
 
