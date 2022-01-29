@@ -2,15 +2,15 @@
 
 
 # User information to inject in metadata
-m_composer='Pink Pearl® Digital Media'
+m_composer=''
 m_copyright=''
-m_comment=''
+m_comment='Converted with imgconv.sh (RickOrchard@Github)'
 
 
 clear
 
 # Define constants
-scriptv="v1.22"
+scriptv="v1.30"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -18,7 +18,7 @@ logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ======================================================================================================="
-echo -e "            Batch convert images, with some options. Copyleft 2019 RickOrchard@Github""
+echo -e "                 Batch convert (old) video's, degraining  + scaling, RickOrchard 2021, no copyright"
 echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 
@@ -56,6 +56,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 	echo -e ""
 	
 
+	clear
 	# ... select quality
 	echo -e "      SELECT QUALITY: "
 	echo -e "     (1) low quality"
@@ -141,7 +142,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 
 
-
+	clear
 	# ... rename output
 	echo -e "      APPEND CUSTOM TEXT TO FILENAMES? "
 	echo -e "     (0) no"
@@ -169,7 +170,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 
 
-
+	clear
 	# ... select noise reduction
 	echo -e "\n"
 	echo -e "      SELECT DENOISING LEVEL: "
@@ -210,6 +211,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 
 
+	clear
 	# ... select sharpening
 	echo -e "      SELECT SHARPENING LEVEL: "
 	echo -e "     (0) none"
@@ -242,8 +244,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 
 
-
-
+	clear
 	# ... select resize
 	echo -e "      SELECT RESIZING: "
 	echo -e "     (0) no, keep original"
@@ -284,8 +285,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 
 
-
-
+	clear
 	# ... select contrast
 	echo -e "      SELECT CONTRAST ENHANCEMENT"
 	echo -e "     (0) none, keep original"
@@ -314,13 +314,12 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 
 
 
-
-
-	# ... select METADATA
+	clear
+	# ... preserve METADATA, if no -> actively erases ALL metadata!
 	echo -e "\n"
 	echo -e ""
 	echo -e "      Copy METADATA?"
-	echo -e "     (0) no"
+	echo -e "     (0) no, clean all tags"
 	echo -e "     (1) yes"
 	echo -e ""
 	read -p "      --> " include_meta
@@ -346,8 +345,11 @@ do
 	echo -e "........................Processing "$f"...to...$outfile................"
 	echo -e ".\n.\n.\n." >> $logfile
     convert "$f" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg9 -verbose "$outfile"
-    if [ $include_meta = "1" ]; then
+    if [ $include_meta = "1" ]
+    then
         exiv2 -ea- "$f" | exiv2 -ia- "$outfile" &>> $logfile
+    else
+    	exiv2 -d a "$outfile" &>> $logfile
     fi
 done
 
