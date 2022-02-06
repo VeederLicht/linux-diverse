@@ -12,10 +12,9 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.39"
+scriptv="v1.41"
 sYe="\e[93m"
 sNo="\033[1;35m"
-logfile=$(date +%Y%m%d_%H.%M_)"vidconv.rep"
 
 # Show banner
 echo -e "\n ${sNo}"
@@ -39,10 +38,15 @@ do
 done
 
 
+mkdir  ./vidconv-$(date +%Y%m%d)  2> /dev/null
+base1="./vidconv-$(date +%Y%m%d)/"
+logfile=$base1/$(date +%Y%m%d_%H.%M_)"vidconv.rep"
+
+
 echo -e "  =======================================================================================================" > $logfile
 echo -e "  -------------------------------------vidconv.sh $scriptv logfile---------------------------------------\n" >> $logfile
 
-	base1="./"
+
 
 	# ... select source format
 	echo -e "\n"
@@ -52,7 +56,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	echo -e "     (s) Preprocess, Super8 13:9  (sar 1/1)"
 	echo -e "     (1) Postprocess/finalize (AV1)"
 	echo -e "     (4) Postprocess/finalize (H264)"
-	echo -e "     (n) Nvenc convert (H264)"
+	echo -e "     (n) NVENC high quality convert (H264)"
 	echo -e "     (m) Change container to mp4"
 	echo -e "     (a) Extract audio track"
 	echo -e ""
@@ -133,7 +137,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		arg0=""
 		arg1="-gpu 0 -c:v h264_nvenc -profile:v high -preset slow -2pass true"
 		arg2=""
-		arg3="[h264]"
+		arg3=".[h264]"
 		arg10=".mp4"
 		arg13="-movflags +faststart"
 		;;
