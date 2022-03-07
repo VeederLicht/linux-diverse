@@ -12,7 +12,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v1.41"
+scriptv="v1.50"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
@@ -47,7 +47,6 @@ echo -e "  =====================================================================
 echo -e "  -------------------------------------vidconv.sh $scriptv logfile---------------------------------------\n" >> $logfile
 
 
-
 	# ... select source format
 	echo -e "\n"
 	echo -e "     (o) Preprocess, original ratio  (sar 1/1)"
@@ -68,7 +67,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		echo -e "  -----------------Preprocess (sar 1/1), original ratio, no crop \n" >> $logfile
 		arg0="-vf format=yuv420p"
 #		arg1=",setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -crf 14 -c:a aac -b:a 256k"
-		arg1=",setsar=sar=1/1 -c:v libx264 ${metadata_inject} -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
+		arg1=",setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -tune grain -crf 17 -forced-idr true -c:a aac -b:a 256k"
 		arg2="[ori]"
 		arg3=".h264"
 		arg10=".m4v"
@@ -77,7 +76,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	  "v")
 		echo -e "  -----------------Preprocess, VHS 4:3  (sar 1/1) \n" >> $logfile
 		arg0="-vf format=yuv420p"
-		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
+		arg1=",scale=ih*(4/3):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -tune grain -crf 17 -forced-idr true -c:a aac -b:a 256k"
 		arg2=."[4x3]"
 		arg3=".[h264]"
 		arg10=".m4v"
@@ -86,7 +85,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	  "d")
 		echo -e "  -----------------Preprocess, Double8 11:8  (sar 1/1) \n" >> $logfile
 		arg0="-vf format=yuv420p"
-		arg1=",scale=ih*(11/8):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
+		arg1=",scale=ih*(11/8):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -tune grain -crf 17 -forced-idr true -c:a aac -b:a 256k"
 		arg2=".[11x8]"
 		arg3=".[h264]"
 		arg10=".m4v"
@@ -95,7 +94,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 	  "s")
 		echo -e "  -----------------Preprocess, Super8 13:9 \n" >> $logfile
 		arg0="-vf format=yuv420p"
-		arg1=",scale=ih*(13/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -intra -preset:v slow -profile:v high -crf 17 -tune grain -c:a aac -b:a 256k"
+		arg1=",scale=ih*(13/9):ih:sws_flags=lanczos,setsar=sar=1/1 -c:v libx264 -preset:v slow -profile:v high -tune grain -crf 17 -forced-idr true -c:a aac -b:a 256k"
 		arg2=".[13x9]"
 		arg3=".[h264]"
 		arg10=".m4v"
@@ -164,7 +163,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		;;
 	esac
 
-
+	clear
 	case $answer1 in
 
     # IN CASE OF PREPROCESSING...
@@ -240,9 +239,9 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		    exit 3
 		    ;;
 	    esac
-        ;;
+		;;
 
-    # IN CASE OF FINAL OUTPUT...
+       # IN CASE OF FINAL OUTPUT...
 	  "1"|"4")
 	    # ... select quality
 	    echo -e "\n"
@@ -298,6 +297,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 		    ;;
 	    esac
 
+		clear
 	    # ... select crystalizer
 	    echo -e "\n"
 	    echo -e ""
@@ -316,7 +316,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
         ;;
     esac
 
-
+	clear
 	# ... select length
 	echo -e "\n"
 	echo -e "     (f) Full video length"
@@ -351,7 +351,7 @@ echo -e "  -------------------------------------vidconv.sh $scriptv logfile-----
 
 
 
-
+clear
 # LET'S GET TO WORK
 
 for f in "$@"
