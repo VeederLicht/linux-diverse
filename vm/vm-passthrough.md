@@ -84,6 +84,15 @@ Reboot & controleer of de virtio (fake) driver goed is toegewezen aan de gekozen
 lspci -nnk -d [device:id]
 ``
 
+## QEMU configuratie aanpassen
+
+> BIOS > UEFI
+
+> CPU > passthrough-host + socket/cores aanpassen
+
+
+
+
 ## Installeer het Guest-OS
 
 1. zoals aanbevolen, eerst zonder de PCI-passthrough
