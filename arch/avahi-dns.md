@@ -1,6 +1,6 @@
 ## INSTALLING AVAHI and NSS-MDNS
 
-Installing these services can prevent all sorts of headeaches with *network services* like CUPS ('cups-internal-server-error') and enables *network shares* scanning in the filemanagers
+Installing these services can prevent all sorts of headeaches with *network services* like CUPS ('cups-internal-server-error') and enables *network shares* scanning in the filemanagers (see: https://github.com/OpenPrinting/cups-filters/issues/308)
 
     yay -S avahi nss-mdns
     
