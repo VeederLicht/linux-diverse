@@ -7,6 +7,15 @@ file: /home/.bashrc
     neofetch
 
 
+## NUMLOCK (lightdm)
+
+Installeer _numlockx_
+    
+Voeg toe aan de config van de greeter:
+
+    greeter-setup-script=/usr/bin/numlockx on
+
+
 ## KEYPAD
 
 See current options:
@@ -23,16 +32,24 @@ Set comma (for european models):
 
 ### QT/GTK
 
-> Option 1
+> Option 1 (needs qt5-styleplugins)
 
-*  file: /etc/profile
+* file: ~/profile (local)
 
         export QT_QPA_PLATFORMTHEME=gtk2
+        
+* file: /etc/environment (global)
+
+        QT_QPA_PLATFORMTHEME=gtk2
 
 > Option 2
 
 * Install Qt5 Configuration Utility
 
-* file: /etc/profile
+* file: ~/profile (local)
+
+        export QT_QPA_PLATFORMTHEME=qt5ct
+        
+* file: /etc/environment (global)
 
         export QT_QPA_PLATFORMTHEME=qt5ct
