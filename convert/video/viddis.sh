@@ -12,40 +12,51 @@ if [ ! -f "$1" ]; then
 fi
 
 
+# Define constants
+scriptv="v2.0.0"
+
+
+
 clear
 echo -e "\e[2m  =============================================================================================="
 echo -e "\e[2m      A video dismembering batch script using ffmpeg, RickOrchard 2020, no copyright"
-echo -e "\e[2m  -----------------------------------------v1.3-------------------------------------------------"
+echo -e "\e[2m  -----------------------------------------$scriptv-------------------------------------------------"
 echo -e "\n\n"
 	
+
 # ... paths definition
 
-	log1="viddis.rep"
+	logfile="viddis.rep"
 
 	base1="./${1}.dir/"
 	rm -Rf "${base1}"
 	mkdir -p "${base1}"
 	
-	out_i="${base1}ext_i/"
+	out_i="${base1}extract_i/"
 	mkdir -p "${out_i}"
 	
-	out_a="${base1}ext_a/"
+	out_a="${base1}extract_a/"
 	mkdir -p "${out_a}"
 	
-	out_m="${base1}ext_m/"
+	out_m="${base1}extract_m/"
 	mkdir -p "${out_m}"
 	
 	
-# ... picture quality
 
-	read -p "Extract images to low or high quality (l/h): " answer1
+# ... picture quality
+  
+
+	echo -e "Extract images to normal or high quality:"
+	echo -e "    [0] normal"
+	echo -e "    [1] high"
+	read -p "(0-1): " answer1
 
 	case $answer1 in
-	  "l")
-		arg3="-q:v 90 ${out_i}${1}_%05d.webp"
+	  "0")
+		arg3="-q:v 5 ${out_i}${1}_%05d.jpg"
 		;;
-	  "h")
-		arg3="-lossless 1 ${out_i}${1}_%05d.webp"
+	  "1")
+		arg3="-q:v 2 ${out_i}${1}_%05d.jpg"
 		;;
 	  *)
 		echo "Invalid answer, exiting..."
@@ -55,14 +66,20 @@ echo -e "\n\n"
 
 
 # ... aspect ratio
-	
-	echo -e "\n\nScale and correct aspect ratio of images?"
-	echo -e "    [0] none, keep video aspect and resolution"
-	echo -e "    [1] 1.361/576p (Double 8mm original)"
-	echo -e "    [2] 1.441/576p (Super 8mm original)"
-	echo -e "    [3] HD/720p"
-	echo -e "    [4] FullHD/1080p"
-	echo -e "    [5] UHD/2160p"
+    
+    clear
+    echo -e "\n\n"
+
+	echo -e "Current pixel resolution and display aspect ratio are:"
+	ffprobe -i "$1" -v fatal -select_streams v:0 -show_entries stream=height,width,sample_aspect_ratio,display_aspect_ratio -of csv=s=,:p=0:nk=0
+
+	echo -e "Set visual aspect ratio for this video:"
+	echo -e "    [0] raw output (might not be the correct display-aspect-ratio)"
+	echo -e "    [1] 4:3    (old TV)"
+	echo -e "    [2] 11:8   (8mm film)"
+	echo -e "    [3] 3:2    (Super8 film)"
+	echo -e "    [4] 16:9   (HD)"
+	echo -e "    [5] 18:9   (Univisium)"
 	read -p "(0-5): " answer1
 
 
@@ -71,19 +88,19 @@ echo -e "\n\n"
 		arg2=""
 		;;
 	  1)
-		arg2="scale=784x576,setdar=dar=1.361,"
+		arg2="scale=ih*(4/3):ih:sws_flags=lanczos,"
 		;;
 	  2)
-		arg2="scale=830x576,setdar=dar=1.441,"
+		arg2="scale=ih*(11/8):ih:sws_flags=lanczos,"
 		;;
 	  3)
-		arg2="scale=1280x720,setdar=dar=1.778,"
+		arg2="scale=ih*(3/2):ih:sws_flags=lanczos,"
 		;;
 	  4)
-		arg2="scale=1920x1080,setdar=dar=1.778,"
+		arg2="scale=ih*(16/9):ih:sws_flags=lanczos,"
 		;;
 	  5)
-		arg2="scale=3840x2160,setdar=dar=1.778,"
+		arg2="scale=ih*(18/9):ih:sws_flags=lanczos,"
 		;;
 	  *)
 		echo "Invalid answer, exiting..."
@@ -91,20 +108,27 @@ echo -e "\n\n"
 		;;
 	esac
 
-# ... deinterlace
 
-	read -p "Deinterlace? (y/n): " answer1
+
+# ... Superscale images
+
+    clear
+    echo -e "\n\n"
+	echo -e "Superscale images (2x):"
+	echo -e "    [0] no"
+	echo -e "    [1] Super2xsai"
+	echo -e "    [2] xbr"
+	read -p "(0-2): " answer1
 
 	case $answer1 in
-	  "y")
-		arg1="yadif,"
-#	  	if [[ $arg2 != "" ]]
-#		  then
-#			arg1="${arg1},"
-#		fi
+	  "0")
+		arg6=""
 		;;
-	  "n")
-		arg1=""
+	  "1")
+		arg6="super2xsai,"
+		;;
+	  "2")
+		arg6="xbr=n=2,"
 		;;
 	  *)
 		echo "Invalid answer, exiting..."
@@ -113,26 +137,125 @@ echo -e "\n\n"
 	esac
 
 
-# ... concatenate filters
 
-	arg1="${arg1}${arg2}"
 
-#	if [[ $arg1 != "" ]]
-#	  then
-#	  	arg1="-vf ${arg1}"
-#	fi
+# ... Interpolate framerate
+
+    clear
+    echo -e "\n\n"
+
+	echo -e "Current video framerate is:"
+	ffprobe -i "$1" -v fatal -select_streams v:0 -show_entries stream=avg_frame_rate -of csv=s=,:p=0:nk=0
+
+	echo -e "Interpolate to desired framerate:"
+	echo -e "    [0] no"
+	echo -e "    [1] 50 fps"
+	echo -e "    [2] 60 fps"
+	read -p "(0-2): " answer1
+
+	case $answer1 in
+	  "0")
+		arg7=""
+		;;
+	  "1")
+		arg7="minterpolate=fps=50:mi_mode=mci:me_mode=bidir:mc_mode=aobmc:me=umh,"
+		;;
+	  "2")
+		arg7="minterpolate=fps=60:mi_mode=mci:me_mode=bidir:mc_mode=aobmc:me=umh,"
+		;;
+	  *)
+		echo "Invalid answer, exiting..."
+		exit 5
+		;;
+	esac
+
+
+# ... deinterlace
+    
+    clear
+    echo -e "\n\n"
+	echo -e "Deinterlace:"
+	echo -e "    [0] no"
+	echo -e "    [1] yadif"
+	echo -e "    [2] bwdif"
+	read -p "(0-2): " answer1
+
+	case $answer1 in
+	  "0")
+		arg1=""
+		;;
+	  "1")
+		arg1="yadif,"
+		;;
+	  "2")
+		arg1="bwdif,"
+		;;
+	  *)
+		echo "Invalid answer, exiting..."
+		exit 5
+		;;
+	esac
+
+
+
+# ... select deblocking
+    
+    clear
+    echo -e "\n\n"
+    echo -e "Note: in order for deinterlacing to work properly on very grainy footage, it might help to deblock the footage."
+    echo -e ""
+    echo -e "     (0) None"
+    echo -e "     (1) Low (high quality, slow)"
+    echo -e "     (2) Medium (fast)"
+    echo -e "     (3) High"
+    echo -e "     (4) Extreme (very slow)"
+    echo -e ""
+    read -p "       Select deblocking/denoising level: " deblock
+    echo -e ""
+
+    case $deblock in
+      "0")
+	    arg5=""
+	    ;;
+      "1")
+        echo -e "  -----------------Low strength deblocking \n" >> $logfile
+	    arg5="bm3d=sigma=3,"
+	    ;;
+	    "2")
+        echo -e "  -----------------Medium strength deblocking/denoising \n" >> $logfile
+	    arg5="spp=2:1:mode=soft,"
+	    ;;
+	    "3")
+        echo -e "  -----------------High strength deblocking/denoising \n" >> $logfile
+	    arg5="spp=3:2:mode=soft,"
+	    ;;
+	    "4")
+        echo -e "  -----------------Extreme strength deblocking/denoising \n" >> $logfile
+	    arg5="spp=4:3:mode=soft,"
+	    ;;
+      *)
+	    echo "Unknown option, exiting..."
+	    exit 3
+	    ;;
+    esac
+
 
 
 # ... extract audio
 
-	read -p "Extract audio to lossless (FLAC) or original (f/o): " answer1
+    clear
+    echo -e "\n\n"
+	echo -e "Extract audio:"
+	echo -e "    [0] original"
+	echo -e "    [1] FLAC"
+	read -p "(0-1): " answer1
 
 	case $answer1 in
-	  "f")
-		arg4="-vn -acodec flac ${out_a}${1}.flac"
-		;;
-	  "o")
+	  "0")
 		arg4="-vn -acodec copy ${out_a}${1}.mka"
+		;;
+	  "1")
+		arg4="-vn -acodec flac -compression_level 3 ${out_a}${1}.flac"
 		;;
 	  *)
 		echo "Invalid answer, exiting..."
@@ -143,16 +266,16 @@ echo -e "\n\n"
 
 # ... RUN!
 
-	echo -e "\n\nCreating logfile (${base1}${log1})\n\n"
-	echo "Batch Image Extraction script - output"  > "${base1}${log1}"
-	date  >> "${base1}${log1}"
-	echo -e "+++++++++++++++++++++++++++++++++++++++++++\n\n\n" >> "${base1}${log1}"
+	echo -e "\n\nCreating logfile (${base1}${logfile})\n\n"
+	echo "Batch Image Extraction script - output"  > "${base1}${logfile}"
+	date  >> "${base1}${logfile}"
+	echo -e "+++++++++++++++++++++++++++++++++++++++++++\n\n\n" >> "${base1}${logfile}"
 	
 
 # ... metadata
 
 		echo -e "\n\n    Extracting metadata from ${1}..."
-		echo -e "\n\n  ⟹  PROCESSING METADATA ${1}:" >> "${base1}${log1}"
+		echo -e "\n\n  ⟹  PROCESSING METADATA ${1}:" >> "${base1}${logfile}"
 		ffprobe -i "${1}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format flat > "${out_m}${1}.flat"
 		ffprobe -i "${1}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format json > "${out_m}${1}.json"
 		ffprobe -i "${1}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format ini > "${out_m}${1}.ini"
@@ -161,22 +284,22 @@ echo -e "\n\n"
 # ... audio
 
 		echo -e "\n\n    Extracting audio from ${1}..."
-		echo -e "\n\n  ⟹  PROCESSING AUDIO ${1}:" >> "${base1}${log1}"
-#		ffmpeg -y -loglevel repeat+level+verbose -i ${1} ${arg4} 2>> "${base1}${log1}"
+		echo -e "\n\n  ⟹  PROCESSING AUDIO ${1}:" >> "${base1}${logfile}"
+		ffmpeg -y -hide_banner -loglevel repeat+level+verbose -i ${1} ${arg4} 2>> "${base1}${logfile}"
 
 
 # ... images		
 		
 		echo -e "\n\n    Extracting video from ${1}..."
 		fcount1=`ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 ${1}`
-		echo -e "\n\n  ⟹  PROCESSING VIDEO ${1} (${fcount1} frames):" >> "${base1}${log1}"
+		echo -e "\n\n  ⟹  PROCESSING VIDEO ${1} (${fcount1} frames):" >> "${base1}${logfile}"
 		echo -e "\n Number of frames to be extracted: ${fcount1}"
-		echo "ffmpeg -y -loglevel repeat+level+verbose -i ${1} -vf ${arg1}format=yuv420p ${arg3}"
+		ffmpeg -y -hide_banner -i ${1} -vf ${arg5}${arg1}${arg7}${arg2}${arg6}setsar=sar=1/1 ${arg3}
 
 # ... finish up
 
-	echo -e "\n\n\n+++++++++++++++++++++++++++++++++++++++++++" >> "${base1}${log1}"
-	echo "   BATCH FINISHED"  >> "${base1}${log1}"
-	date  >> "${base1}${log1}"
+	echo -e "\n\n\n+++++++++++++++++++++++++++++++++++++++++++" >> "${base1}${logfile}"
+	echo "   BATCH FINISHED"  >> "${base1}${logfile}"
+	date  >> "${base1}${logfile}"
 
 echo -e "\n\n\n  \e[4mFinished.\e[0m \n\n\n"
