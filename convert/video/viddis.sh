@@ -328,8 +328,8 @@ done
     echo -e "(Note: in order for deinterlacing to work properly on very compressed footage, deblocking might help)"
     echo -e ""
     echo -e "     [0) None"
-    echo -e "     [1) Light         (detail preserving, slow)"
-    echo -e "     [2) Medium        (fast)"
+    echo -e "     [1) Light         (fast)"
+    echo -e "     [2) Medium"
     echo -e "     [3) Strong"
     echo -e "     [4) Very strong   (slow)"
     echo -e ""
@@ -337,24 +337,20 @@ done
     echo -e ""
 
     case $deblock in
-      "0")
+	"0")
 	    f_db=""
 	    ;;
-      "1")
-        echo -e "  -----------------Low strength deblocking \n" >> $logfile
-	    f_db="bm3d=sigma=3,"
+	"1")
+	    f_db="spp=2:1,"
 	    ;;
-	    "2")
-        echo -e "  -----------------Medium strength deblocking/denoising \n" >> $logfile
+	"2")
 	    f_db="spp=2:1:mode=soft,"
 	    ;;
-	    "3")
-        echo -e "  -----------------High strength deblocking/denoising \n" >> $logfile
+	"3")
 	    f_db="spp=3:2:mode=soft,"
 	    ;;
-	    "4")
-        echo -e "  -----------------Extreme strength deblocking/denoising \n" >> $logfile
-	    f_db="spp=4:3:mode=soft,"
+	"4")
+	    f_db="spp=5:4:mode=soft,"
 	    ;;
       *)
 	    echo "Unknown option, exiting..."
