@@ -159,24 +159,8 @@ ffmpeg -i in.mov "format=yuv420p,setsar=sar=1/1,bm3d=sigma=12,atadenoise,unsharp
 ffmpeg -i INPUT.mp4 -i INPUT.mp3 -map 0:v -c:v libx264 -preset slow -crf 17 -map 0:a -c:a copy out.mkv
 ```
 
-## INFO
-
-#### I01. Get framerate (for use in scripts etc)
-```
-ffmpeg -i VTS_04_1.VOB 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p"
-```
-
-#### I02. Count number of frames
-```
-ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 input.mp4
-```
-
-#### I03. List FFMPEG supported filters / codecs / options ...
-```
-ffmpeg -filters | grep ...
-ffmpeg -codecs | grep ...
-ffmpeg -h encoder=h264_nvenc
-```
+#### MERGE STREAMS (v=video, a=audio, s=subtitles):
+            ffmpeg -i input1.mp4 -i input2.mp4  -c:v copy -c:a copy -b:a 96k -map 0:0 -map 1:s output.mp4
 
 <br>
 
@@ -226,32 +210,53 @@ ffmpeg -fflags nobuffer -f v4l2 -i /dev/video0 -itsoffset 0.25 -f alsa -i hw:0 -
 <br>
 <br>
 
-## USING FFMPEG AS MIDDLEWARE
-It appears that applying ffmpeg-filters *before* colorization processes will influence the resulting colors. Also, currently many AI restoration tools can only handle sub 900K pixel images relyably.
+## AV1
+> equivalent to libx264 crf 25
 
-Solution:
 
-1. Extract images (do interlace!, interlaced images color pourly):
+
+#### HIGH-AV1
+            ffmpeg -i test2.mp4 -vf format=yuv420p,scale=-2:1080:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -c:a libopus -b:a 96k output.webm
+
+
+#### MEDIUM-AV1:
+            ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:540:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -c:a libopus -b:a 96k output.webm
+
+Deze laatste is de beste. -qp 40 is de ideale balans tussen vloeiend beeld zonder blokken en compressie. Al vanaf 270p is de video prima bruikbaar.
+
+
+#### SMALL-AV1:
+            ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:270:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -af "highpass=f=150,lowpass=f=3500" -ar 24000 -c:a libopus -b:a 64k output.webm
+
+
+#### TINY-AV1:
+            ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:135:sws_flags=gauss,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -af "highpass=f=150,lowpass=f=3500" -ar 24000 -ac 1 -c:a libopus -b:a 32k output.webm
+
+
 ```
-ffmpeg -y -i input.mp4 -vf yadif,format=yuv420p -q:v 90 out_%05d.jpg.webp
-```
 
-2. naar DeepAI / BOPBTL
-
-3. Apply other effects:
-```
-ffmpeg -y -i ai_out.jpg -vf \
-                                 scale=784x576 \
-                                 ,setdar=dar=1.361 \
-                                 ,removegrain=4:4:4:4 \
-                                 ,unsharp=11:11:0.4:5:5:0.0 \
-                                 ,normalize=blackpt=black:whitept=white:smoothing=0 \
-                                 ,format=yuv420p \
-                                 -q:v 90 mp4_0011-vfilters.webp
-```
-
-## TIPS
+## GENERAL TIPS
 
   * MKV container is probably the most versatile container. Contains practically any type of audio+video codec
   * MKA like above
-  * Editable formats for non-linear video editors are ProRes, DNXHD and DNXHQ, but also 
+  * Editable formats for non-linear video editors are ProRes, DNXHD and DNXHQ
+
+
+### FFMPEG INFO
+
+#### I01. Get framerate (for use in scripts etc)
+```
+ffmpeg -i VTS_04_1.VOB 2>&1 | sed -n "s/.*, \(.*\) fp.*/\1/p"
+```
+
+#### I02. Count number of frames
+```
+ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 input.mp4
+```
+
+#### I03. List FFMPEG supported filters / codecs / options ...
+```
+ffmpeg -filters | grep ...
+ffmpeg -codecs | grep ...
+ffmpeg -h encoder=h264_nvenc
+```
