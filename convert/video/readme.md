@@ -210,29 +210,33 @@ ffmpeg -fflags nobuffer -f v4l2 -i /dev/video0 -itsoffset 0.25 -f alsa -i hw:0 -
 <br>
 <br>
 
+
 ## AV1
 > equivalent to libx264 crf 25
 
 
-
 #### HIGH-AV1
-            ffmpeg -i test2.mp4 -vf format=yuv420p,scale=-2:1080:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -c:a libopus -b:a 96k output.webm
-
+```
+ffmpeg -i test2.mp4 -vf format=yuv420p,scale=-2:1080:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -c:a libopus -b:a 96k output.webm
+```
 
 #### MEDIUM-AV1:
-            ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:540:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -c:a libopus -b:a 96k output.webm
+```
+ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:540:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -c:a libopus -b:a 96k output.webm
+```
 
 Deze laatste is de beste. -qp 40 is de ideale balans tussen vloeiend beeld zonder blokken en compressie. Al vanaf 270p is de video prima bruikbaar.
 
 
-#### SMALL-AV1:
-            ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:270:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -af "highpass=f=150,lowpass=f=3500" -ar 24000 -c:a libopus -b:a 64k output.webm
 
+#### SMALL-AV1:
+```
+ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:270:sws_flags=lanczos,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -af "highpass=f=150,lowpass=f=3500" -ar 24000 -c:a libopus -b:a 64k output.webm
+```
 
 #### TINY-AV1:
-            ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:135:sws_flags=gauss,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -af "highpass=f=150,lowpass=f=3500" -ar 24000 -ac 1 -c:a libopus -b:a 32k output.webm
-
-
+```
+ffmpeg -i input.mp4 -vf format=yuv420p,scale=-2:135:sws_flags=gauss,setsar=sar=1/1,unsharp=3:3:0.3 -c:v libsvtav1 -b:v 0 -qp 35 -preset 7 -af "highpass=f=150,lowpass=f=3500" -ar 24000 -ac 1 -c:a libopus -b:a 32k output.webm
 ```
 
 ## GENERAL TIPS
