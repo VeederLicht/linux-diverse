@@ -17,3 +17,6 @@ Start and enable the Avahi service:
 Check service workings:
 
     avahi-browse --all --ignore-local --resolve --terminate
+
+
+> (Be sure to open **UDP** port **5353** if you are using a firewall)
