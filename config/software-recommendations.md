@@ -1,3 +1,13 @@
+    ### COMMAND LINE TOOLS
+    . ranger   (file manager)
+    . btop  (htop alternative)
+    . gdu   (disk usage, 'baobab')
+    . ncdu   (disk usage, 'baobab')
+    . lsd   (super-ls)
+    . speedtest-cli (network speed test)
+    . lolcat    (colorize terminal)
+    . trash-cli (trash management)
+
     ### SYSTEM TOOLS
     . kgpg   (gpg key manager (good!))
     . krita/kwrite  (text editor)
