@@ -1,3 +1,7 @@
+    #### FONTS
+    . Gabriela
+    
+    
     ### COMMAND LINE TOOLS
     . ranger   (file manager)
     . btop  (htop alternative)
