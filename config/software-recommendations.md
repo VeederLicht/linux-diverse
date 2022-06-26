@@ -1,5 +1,6 @@
     #### FONTS
     . Gabriela
+    . Gentium Basic
     
     
     ### COMMAND LINE TOOLS
