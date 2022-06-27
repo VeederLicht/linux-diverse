@@ -3,121 +3,118 @@
 clear
 
 # Define constants
-scriptv="v2.0.0-test"
+scriptv="v2.4.0-alpha"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
 # Show banner
 echo -e "\n ${sNo}"
-echo -e "  ==========================================================VIDDIS=========================================================="
+echo -e "  ==========================================================VIDDIS============================================================"
 echo -e "       A video conversion and dissection batch script using ffmpeg, RickOrchard 2020, no copyright"
-echo -e "  ---------------------------------------------------------${sYe} $scriptv ${sNo}---------------------------------------------------------"
+echo -e "  -----------------------------------------------------${sYe} $scriptv ${sNo}---------------------------------------------------------"
 
 
-# Test nr. of arguments
-if [ $# -eq 0 ]
+################ CHECK RUNCONDITIONS ###################################
+if [ $# -eq 0 ]	# Test nr. of arguments
   then
     echo "        No source files specified."
 	exit 2
 fi
 
-
-# List files
+# List files selected for input
 echo -e "\n\n   INPUT FILES:\n"
 nFiles=0
-for f in "$@"
-do
+for f in "$@"; do
 	echo -e "    ✻ ${f}"
-    ((nFiles++))
+	((nFiles++))
 done
 
 
-# ... convert or dissect?
-    echo -e "\n\n"
-	echo -e "Convert or dissect video's:"
-	echo -e "    [0] convert"
-	echo -e "    [1] dissect"
-	read -p "(0-1): " convdiss
 
-	case $convdiss in
-      # CONVERT SPECIFIC OPTIONS
-	  "0")
-        # ...
-        # ... picture quality
-        clear
-        echo -e "\n\n"
-	    echo -e "Convert video to:"
-	    echo -e "    [0] M4V    (H264, high quality, use for editing etc.)"
-	    echo -e "    [1] MP4    (H264, normal quality)"
-	    echo -e "    [2] MP4    (H264, internet quality)"
-	    echo -e "    [3] WEBM   (AV1, hq)"
-	    echo -e "    [4] WEBM   (AV1, nq)"
-	    echo -e "    [5] MP4    (H264, NVENC, nq)"
-	    echo -e "    [6] MP4    (H265, NVENC, nq)"
-	    read -p "(0-6): " answer1
+################ FUNCTION DEFINITIONS ###################################
+function ask_convert_quality {		# ... picture quality
+	clear
+	echo -e "\n\n"
+	echo -e "Convert video to:"
+	echo -e "    [0] M4V    (H264, high quality, use for editing etc.)"
+	echo -e "    [1] MP4    (H264, normal quality)"
+	echo -e "    [2] MP4    (H264, internet quality)"
+	echo -e "    [3] WEBM   (AV1, hq)"
+	echo -e "    [4] WEBM   (AV1, nq)"
+	echo -e "    [5] MP4    (H264, NVENC, nq)"
+	echo -e "    [6] MP4    (H265, NVENC, nq)"
+	read -p "(0-6): " answer1
 
-	    case $answer1 in
-	      "0")
-		    outvid="-c:v libx264 -preset:v slow -profile:v high -tune grain -crf 17 -forced-idr true -c:a aac -b:a 384k"
-            outext="m4v"
-            o_fl="-movflags frag_keyframe+empty_moov"
-		    ;;
-	      "1")
-		    outvid="-c:v libx264 -preset:v slow -profile:v high -crf 23 -c:a aac -b:a 256k"
-            outext="mp4"
-            o_fl="-movflags +faststart"
-		    ;;
-	      "2")
-		    outvid="-c:v libx264 -crf 27 -c:a aac -b:a 128k"
-            outext="mp4"
-            o_fl="-movflags +faststart"
-		    ;;
-	      "3")
-		    outvid="-c:v libsvtav1 -b:v 0 -qp 30 -preset 6 -c:a libopus -b:a 128k"
-            outext="webm"
-            o_fl=""
-		    ;;
-	      "4")
-		    outvid="-c:v libsvtav1 -c:a libopus -b:a 128k"
-            outext="webm"
-            o_fl=""
-		    ;;
-	      "5")
-		    outvid="-gpu 0 -c:v h264_nvenc -preset slow -c:a aac -b:a 256k"
-            outext="mp4"
-            o_fl="-movflags +faststart"
-		    ;;
-	      "6")
-		    outvid="-gpu 0 -c:v hevc_nvenc -preset slow -c:a aac -b:a 256k"
-            outext="mp4"
-            o_fl="-movflags +faststart"
-		    ;;
-	      *)
-		    echo "Invalid answer, exiting..."
-		    exit 3
-		    ;;
-	    esac
-        # ...
-        # ... metadata
-        clear
-        echo -e "\n\n"
-        m_comment='Converted with viddis.sh (RickOrchard@Github)'
-	    echo -e "Insert metadata comment?  (optional, may be left blank)"
-	    read -p "» " m_comment
-        slug='viddis'
+	case $answer1 in
+		"0")
+		outvid="-c:v libx264 -preset:v slow -profile:v high -tune grain -crf 18 -forced-idr true -c:a aac -b:a 384k"
+		outext="m4v"
+		o_fl="-movflags frag_keyframe+empty_moov"
+		;;
+		"1")
+		outvid="-c:v libx264 -preset:v slow -profile:v high -crf 24 -c:a aac -b:a 256k"
+		outext="mp4"
+		o_fl="-movflags +faststart"
+		;;
+		"2")
+		outvid="-c:v libx264 -crf 27 -c:a aac -b:a 128k"
+		outext="mp4"
+		o_fl="-movflags +faststart"
+		;;
+		"3")
+		outvid="-c:v libsvtav1 -b:v 0 -qp 30 -preset 7 -c:a libopus -b:a 128k"
+		outext="webm"
+		o_fl=""
+		;;
+		"4")
+		outvid="-c:v libsvtav1 -qp 40 -preset 8 -c:a libopus -b:a 96k"
+		outext="webm"
+		o_fl=""
+		;;
+		"5")
+		outvid="-gpu 0 -c:v h264_nvenc -preset slow -c:a aac -b:a 256k"
+		outext="mp4"
+		o_fl="-movflags +faststart"
+		;;
+		"6")
+		outvid="-gpu 0 -c:v hevc_nvenc -preset slow -c:a aac -b:a 256k"
+		outext="mp4"
+		o_fl="-movflags +faststart"
+		;;
+		*)
+		echo "Invalid answer, exiting..."
+		exit 3
+		;;
+	esac
+}
+
+function ask_meta_comment {		# ... metadata
+	clear
+	echo -e "\n\n"
+	echo -e "Insert metadata comment?  (optional, may be left blank)"
+	read -p "» " m_comment
+	if [ -z "$m_comment" ]
+		then
+			m_comment='Converted with viddis.sh (RickOrchard@Github)'
+	fi
+}
+
+function ask_file_append {		# append slug to filename
+		clear
         echo -e "\n\n"
 	    echo -e "Append text to converted filenames?  (optional, may be left blank)"
-	    read -p "» " slug
-	  ;;
+	    read -p "» " f_slug
+		if [ -z "$f_slug" ]
+			then
+				f_slug='viddis'
+		fi
+}
 
-      # DISSECT SPECIFIC OPTIONS
-	  "1")
-        # ...
-        # ... extract audio
+function ask_extract_audio {		# ... extract audio?
         clear
         echo -e "\n\n"
 	    echo -e "Extract audio:"
-	    echo -e "    [0] original"
+	    echo -e "    [0] original (effects not possible)"
 	    echo -e "    [1] FLAC"
 	    read -p "(0-1): " answer1
 
@@ -133,29 +130,9 @@ done
 		    exit 6
 		    ;;
 	    esac
-        # ...
-        # ... enhance audio
-        clear
-        echo -e "\n\n"
-	    echo -e "Apply audio crystalizer:"
-	    echo -e "    [0] no"
-	    echo -e "    [1] yes"
-	    read -p "(0-1): " answer1
+}
 
-	    case $answer1 in
-	      "0")
-		    f_cr=""
-		    ;;
-	      "1")
-		    f_cr="-af crystalizer"
-		    ;;
-	      *)
-		    echo "Invalid answer, exiting..."
-		    exit 6
-		    ;;
-	    esac
-        # ...
-        # ... picture quality
+function ask_extract_video {        # ... picture quality
         clear
 	    echo -e "Extract video stream to:"
 	    echo -e "    [0] JGP    (normal quality)"
@@ -190,15 +167,9 @@ done
 		    exit 3
 		    ;;
 	    esac
-        ;;
-      *)
-	    echo "Invalid answer, exiting..."
-	    exit 3
-	    ;;
-    esac
+}
 
-
-# ... aspect ratio
+function ask_aspect_ratio { 		# ... aspect ratio
     clear
     echo -e "\n\n"
 	echo -e "Current pixel resolution and display aspect ratio are:${sYe}"
@@ -213,7 +184,7 @@ done
 	read -p "(0-5): " answer1
 
 	case $answer1 in
-	  0)
+	  ""|0)
 		f_ar=""
 		;;
 	  1)
@@ -236,9 +207,9 @@ done
 		exit 4
 		;;
 	esac
+}
 
-
-# ... Resolution
+function ask_resolution {		# ... Resolution
     clear
     echo -e "\n\n"
 	echo -e "Superscale resolution (2x):"
@@ -248,7 +219,7 @@ done
 	read -p "(0-2): " answer1
 
 	case $answer1 in
-	  "0")
+	  ""|0)
 		f_ss=""
 		;;
 	  "1")
@@ -262,23 +233,19 @@ done
 		exit 5
 		;;
 	esac
+}
 
-
-
-
-# ... Framerate
+function ask_framerate {		# ... Framerate
     clear
     echo -e "\n\n"
-	echo -e "Current video framerate is:${sYe}"
-	ffprobe -i "$1" -v fatal -select_streams v:0 -show_entries stream=avg_frame_rate -of csv=s=,:p=0:nk=0
-	echo -e "${sNo}Interpolate to desired framerate:"
+	echo -e "Interpolate to desired framerate:"
 	echo -e "    [0] no"
 	echo -e "    [1] 50 fps"
 	echo -e "    [2] 60 fps"
 	read -p "(0-2): " answer1
 
 	case $answer1 in
-	  "0")
+	  ""|0)
 		f_fr=""
 		;;
 	  "1")
@@ -292,9 +259,9 @@ done
 		exit 5
 		;;
 	esac
+}
 
-
-# ... deinterlace
+function ask_deinterlace { 		# ... deinterlace
     clear
     echo -e "\n\n"
 	echo -e "Deinterlace input video:"
@@ -304,24 +271,23 @@ done
 	read -p "(0-2): " answer1
 
 	case $answer1 in
-	  "0")
+	  ""|0)
 		f_di=""
 		;;
 	  "1")
-		f_di=",yadif=mode=0"
+		f_di="yadif=mode=0,"
 		;;
 	  "2")
-		f_di=",yadif=mode=1"
+		f_di="yadif=mode=1,"
 		;;
 	  *)
 		echo "Invalid answer, exiting..."
 		exit 5
 		;;
 	esac
+}
 
-
-
-# ... select deblocking
+function ask_deblock {		# ... select deblocking
     clear
     echo -e "\n\n"
     echo -e "Select deblocking/denoising of the input video:"
@@ -337,7 +303,7 @@ done
     echo -e ""
 
     case $deblock in
-	"0")
+	  ""|0)
 	    f_db=""
 	    ;;
 	"1")
@@ -357,9 +323,9 @@ done
 	    exit 3
 	    ;;
     esac
+}
 
-
-# ... select sharpening/contrast
+function ask_enhance_image {		# ... select sharpening/contrast
     clear
     echo -e "\n\n"
     echo -e "Select sharpening/contrast of the input video:"
@@ -374,7 +340,7 @@ done
     echo -e ""
 
     case $deblock in
-      "0")
+	  ""|0)
 	    f_sh=""
 	    ;;
       "1")
@@ -394,9 +360,53 @@ done
 	    exit 3
 	    ;;
     esac
+}
 
+function ask_enhance_audio {		# ... enhance audio
+	clear
+	echo -e "\n\n"
+	echo -e "Apply audio crystalizer:"
+	echo -e "    [0] no"
+	echo -e "    [1] yes"
+	read -p "(0-1): " answer1
 
-# ... select length
+	case $answer1 in
+	  ""|0)
+		f_cr=""
+		;;
+		"1")
+		f_cr="-af crystalizer"
+		;;
+		*)
+		echo "Invalid answer, exiting..."
+		exit 6
+		;;
+	esac
+}
+
+function ask_stabilize {			# ... select length
+    clear
+    echo -e "\n\n"
+	echo -e "Stabilize the footage:"
+	echo -e "    [0] No"
+	echo -e "    [1] Yes"
+	read -p "(0-1): " answer1
+
+	case $answer1 in
+	  ""|0)
+			f_st=""
+		;;
+	  "1")
+			f_st="vidstabtransform,"
+		;;
+	  *)
+			echo "Unknown option, exiting..."
+			exit 3
+		;;
+	esac
+}
+
+function ask_length {			# ... select length
     clear
     echo -e "\n\n"
 	echo -e "Select processing length:"
@@ -406,7 +416,7 @@ done
 	read -p "(0-2): " answer1
 
 	case $answer1 in
-	  "0")
+	  ""|0)
 		o_ln=""
 		;;
 	  "1")
@@ -420,9 +430,51 @@ done
 		exit 3
 		;;
 	esac
+}
 
+################## RUN PROGRAM #####################
+# ... convert or dissect?
+    echo -e "\n\n"
+	echo -e "Convert or dissect video's:"
+	echo -e "    [0] convert"
+	echo -e "    [1] dissect"
+	read -p "(0-1): " convdiss
 
+	case $convdiss in
+		# CONVERT SPECIFIC OPTIONS
+		"0")
+			ask_convert_quality
+			ask_meta_comment
+			ask_file_append
+			ask_aspect_ratio
+			ask_resolution
+			ask_framerate
+			ask_deinterlace
+			ask_deblock
+			ask_enhance_image
+			ask_enhance_audio
+			ask_stabilize
+			ask_length
+		;;
 
+      # DISSECT SPECIFIC OPTIONS
+	  "1")
+			ask_extract_audio
+			ask_extract_video
+			ask_aspect_ratio
+			ask_resolution
+			ask_framerate
+			ask_deinterlace
+			ask_deblock
+			ask_enhance_image
+			ask_enhance_audio
+			ask_length
+        ;;
+      *)
+			echo "Invalid answer, exiting..."
+			exit 3
+	    ;;
+    esac
 
 
 # ... RUN!
@@ -441,7 +493,8 @@ done
         do
             clear
             ((fCount++))
-            outfile="${basedir}/${f}[${slug}].${outext}"
+            outbase="${basedir}/${f}»${f_slug}"
+            outfile="${outbase}.${outext}"
         	logfile="${outfile}.log"
 	        echo "Viddis.sh - Extraction & Conversion script (${scriptv})" | tee $logfile
 	        date   | tee -a $logfile
@@ -450,7 +503,12 @@ done
 	        echo -e "\n\n\n+++++++++++++++++SOURCE FILE INFO:\n" >> $logfile
 		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format flat  >> $logfile
 	        echo -e "\n\n\n++++++++++++++++++++++++++RUNNING:\n\n" | tee -a $logfile
-#            time ffmpeg -hide_banner $arg6 -i "$f" $arg0$arg5$arg4$arg1 $arg12 $arg11 $arg13 -map_metadata 0 -metadata comment="$m_comment" "$outfile" -y &>> $logfile
+	        time ffmpeg -hide_banner $o_ln -i "$f" -vf "${f_db}${f_di}${f_ar}${f_fr}${f_ss}${f_sh}setsar=sar=1/1,format=yuv420p" $o_fl $outvid -map_metadata 0 -metadata comment="${m_comment}" ${f_cr} "${outfile}" -y &>> $logfile
+			if [ ! -z "$f_st" ]; then
+				ffmpeg -hide_banner -i "${outfile}" -vf vidstabdetect=shakiness=4:accuracy=15:result="transforms.trf" dummy.mp4 -y &>> $logfile
+				ffmpeg -hide_banner -i "${outfile}" -vf vidstabtransform $o_fl $outvid -map_metadata 0 "${outbase}_stab.${outext}" -y &>> $logfile
+				rm -f dummy.mp4 transforms.trf "${outfile}"
+			fi
 	        echo -e "\n\n\n+++++++++++++++BATCH FINISHED++++++++++++" >> $logfile
 	        date >> $logfile
         done
