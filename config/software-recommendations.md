@@ -12,6 +12,7 @@
     . speedtest-cli (network speed test)
     . lolcat    (colorize terminal)
     . trash-cli (trash management)
+    . whowatch (!bekijk en beheer gegevens en processen van ingelogde gebruikers)
 
     ### SYSTEM TOOLS
     . kgpg   (gpg key manager (good!))
