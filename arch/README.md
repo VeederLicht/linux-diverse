@@ -36,7 +36,7 @@ cat ~/.local/share/applications/mimeapps.list
 xdg-mime --manual
 xdg-mime query default application/pdf
 ```
-TIP: use **xdgmime-changeall.sh** script for mass changes
+TIP: use [**xdgmime-changeall.sh**](https://github.com/RickOrchard/linux-diverse/blob/master/config/xdgmime-changeall.sh) script for mass changes
 
 #### OPTIONAL:
 ```
