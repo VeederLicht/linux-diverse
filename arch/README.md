@@ -25,7 +25,7 @@ sudo systemctl enable --now winbind.service
 
 #### Install often used apps
 ```
-yay -S zoom neofetch gdu lsd speedtest-cli kdenetwork-filesharing nomacs audacity mediainfo-gui jhead ffmpegthumbs ufraw-thumbnailer tumbler webp-thumbnailer google-chrome mpv huiontablet krita gdu btop whowatch clipgrab obs-studio retext darktable
+yay -S zoom neofetch gdu lsd speedtest-cli kdenetwork-filesharing nomacs audacity mediainfo-gui jhead ffmpegthumbs ufraw-thumbnailer tumbler webp-thumbnailer google-chrome mpv huiontablet krita gdu btop whowatch clipgrab obs-studio retext darktable glances
 ```
 
 #### Change default apps
@@ -40,5 +40,5 @@ TIP: use [**xdgmime-changeall.sh**](https://github.com/RickOrchard/linux-diverse
 
 #### OPTIONAL:
 ```
-kdenetwork-filesharing brother-mfc-j5330dw powerstat powertop brscan4 nvidia-inst
+kdenetwork-filesharing brother-mfc-j5330dw powerstat powertop brscan4 nvidia-inst stacer
 ```
