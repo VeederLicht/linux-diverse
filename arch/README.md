@@ -42,3 +42,7 @@ TIP: use [**xdgmime-changeall.sh**](https://github.com/RickOrchard/linux-diverse
 ```
 kdenetwork-filesharing brother-mfc-j5330dw powerstat powertop brscan4 nvidia-inst stacer
 ```
+
+#### KDE Dolphin problem solving
+Dolphin: The file or folder smb://sharename does not exist [link](https://forum.manjaro.org/t/dolphin-the-file-or-folder-smb-sharename-does-not-exist/114900)
+>  In System Settings–>Network Settings–>Windows Shares, add ANY text to the user and password fields and restart Dolphin. Now I get a password prompt and can view and mount shares. 
