@@ -1,5 +1,13 @@
 #!/bin/bash
+
 # !!!! ARGUMENTS IN DOUBLE QOUTES TO AVOID PROBLEMS WITH SPACES IN FILENAMES!!! https://stackoverflow.com/questions/12314451/accessing-bash-command-line-args-vs
+# TODO:
+# * Finish dissection part
+# * Aspect ratio does not work in portrait
+# * copy file dates when creating new file
+
+
+
 clear
 
 # Define constants
