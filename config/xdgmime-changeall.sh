@@ -3,7 +3,7 @@
 
 
 # Define constants
-scriptv="v1.0.0"
+scriptv="v1.1.0"
 sYe="\e[93m"
 sNo="\033[1;35m"
 t1="\t"
@@ -46,6 +46,7 @@ function ask_category {
 	    echo -e "${t3}[0] Audio"
 	    echo -e "${t3}[1] Image"
 	    echo -e "${t3}[2] Video"
+	    echo -e "${t3}[3] Text"
         read -p "${tp}" answer1
 
 	    case $answer1 in
@@ -57,6 +58,9 @@ function ask_category {
 		    ;;
 	      "2")
 		    category="video/"
+		    ;;
+	      "3")
+		    category="text/"
 		    ;;
 	      *)
 		    echo "Invalid answer, exiting..."
