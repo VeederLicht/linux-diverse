@@ -4,14 +4,12 @@
 # TODO:
 # * Finish dissection part
 # * Aspect ratio does not work in portrait
-# * copy file dates when creating new file
-
-
+# ##########################################
 
 clear
 
 # Define constants
-scriptv="v2.4.0-alpha"
+scriptv="v2.4.5-alpha"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
@@ -65,7 +63,7 @@ function ask_convert_quality {		# ... picture quality
 		o_fl="-movflags +faststart"
 		;;
 		"2")
-		outvid="-c:v libx264 -crf 27 -c:a aac -b:a 128k"
+		outvid="-c:v libx264 -preset:v medium -crf 28 -c:a aac -b:a 128k"
 		outext="mp4"
 		o_fl="-movflags +faststart"
 		;;
@@ -516,7 +514,9 @@ function ask_length {			# ... select length
 				ffmpeg -hide_banner -i "${outfile}" -vf vidstabdetect=shakiness=4:accuracy=15:result="transforms.trf" dummy.mp4 -y &>> $logfile
 				ffmpeg -hide_banner -i "${outfile}" -vf vidstabtransform $o_fl $outvid -map_metadata 0 "${outbase}_stab.${outext}" -y &>> $logfile
 				rm -f dummy.mp4 transforms.trf "${outfile}"
+				mv "${outbase}_stab.${outext}" "${outfile}"
 			fi
+		   touch -r "$f" "${outfile}"  # preserve modification date
 	        echo -e "\n\n\n+++++++++++++++BATCH FINISHED++++++++++++" >> $logfile
 	        date >> $logfile
         done
@@ -584,4 +584,3 @@ echo -e "\n\n\n ${sYe} Finished. ${sNo} \n\n"
 echo -e "Start time:  ${startTime} \n\n"
 echo -e "Start time:  $(date) \n\n"
 echo -e "Output files and logs are placed in:  ${basedir}\n\n\n"
-
