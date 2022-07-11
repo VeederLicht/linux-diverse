@@ -1,15 +1,9 @@
 #!/bin/bash
-
 # !!!! ARGUMENTS IN DOUBLE QOUTES TO AVOID PROBLEMS WITH SPACES IN FILENAMES!!! https://stackoverflow.com/questions/12314451/accessing-bash-command-line-args-vs
-# TODO:
-# * Finish dissection part
-# * Aspect ratio does not work in portrait
-# ##########################################
-
 clear
 
 # Define constants
-scriptv="v2.4.5-alpha"
+scriptv="v2.4.8-alpha"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
@@ -34,6 +28,7 @@ for f in "$@"; do
 	echo -e "    ✻ ${f}"
 	((nFiles++))
 done
+echo -e "\n   TOTAL COUNT: ${nFiles}\n\n"
 
 
 
@@ -42,49 +37,49 @@ function ask_convert_quality {		# ... picture quality
 	clear
 	echo -e "\n\n"
 	echo -e "Convert video to:"
-	echo -e "    [0] M4V    (H264, high quality, use for editing etc.)"
-	echo -e "    [1] MP4    (H264, normal quality)"
-	echo -e "    [2] MP4    (H264, internet quality)"
-	echo -e "    [3] WEBM   (AV1, hq)"
-	echo -e "    [4] WEBM   (AV1, nq)"
-	echo -e "    [5] MP4    (H264, NVENC, nq)"
-	echo -e "    [6] MP4    (H265, NVENC, nq)"
+	echo -e "    [0]	H264 Editing Quality	(m4v, high bitrate)"
+	echo -e "    [1]	H264 Standard Quality	(mp4)"
+	echo -e "    [2]	H264 Low Quality	(mp4)"
+	echo -e "    [3]	AV1 Standard Quality	(mp4)"
+	echo -e "    [4]	AV1 Low Quality		(mp4)"
+	echo -e "    [5]	H264 NVENC Medium    (mp4)"
+	echo -e "    [6]	H265 NVENC Medium    (mp4)"
 	read -p "(0-6): " answer1
 
 	case $answer1 in
 		"0")
 		outvid="-c:v libx264 -preset:v slow -profile:v high -tune grain -crf 18 -forced-idr true -c:a aac -b:a 384k"
-		outext="m4v"
+		outext="h264.m4v"
 		o_fl="-movflags frag_keyframe+empty_moov"
 		;;
 		"1")
-		outvid="-c:v libx264 -preset:v slow -profile:v high -crf 24 -c:a aac -b:a 256k"
-		outext="mp4"
+		outvid="-c:v libx264 -preset:v slow -profile:v high -crf 27 -c:a aac -b:a 256k"
+		outext="h264.mp4"
 		o_fl="-movflags +faststart"
 		;;
 		"2")
-		outvid="-c:v libx264 -preset:v medium -crf 28 -c:a aac -b:a 128k"
-		outext="mp4"
+		outvid="-c:v libx264 -preset:v medium -crf 32 -c:a aac -b:a 128k"
+		outext="h264.mp4"
 		o_fl="-movflags +faststart"
 		;;
 		"3")
-		outvid="-c:v libsvtav1 -b:v 0 -qp 30 -preset 7 -c:a libopus -b:a 128k"
-		outext="webm"
+		outvid="-c:v libsvtav1 -b:v 0 -qp 32 -preset 7 -c:a libopus -b:a 128k"
+		outext="av1.mp4"
 		o_fl=""
 		;;
 		"4")
-		outvid="-c:v libsvtav1 -qp 40 -preset 8 -c:a libopus -b:a 96k"
-		outext="webm"
+		outvid="-c:v libsvtav1 -qp 45 -preset 7 -c:a libopus -b:a 96k"
+		outext="av1.mp4"
 		o_fl=""
 		;;
 		"5")
-		outvid="-gpu 0 -c:v h264_nvenc -preset slow -c:a aac -b:a 256k"
-		outext="mp4"
+		outvid="-gpu 0 -c:v h264_nvenc -preset slow -profile:v high -cq 28 -c:a aac -b:a 256k"
+		outext="h264.mp4"
 		o_fl="-movflags +faststart"
 		;;
 		"6")
-		outvid="-gpu 0 -c:v hevc_nvenc -preset slow -c:a aac -b:a 256k"
-		outext="mp4"
+		outvid="-gpu 0 -c:v hevc_nvenc -preset slow -tier high -cq 32 -c:a aac -b:a 256k"
+		outext="h265.mp4"
 		o_fl="-movflags +faststart"
 		;;
 		*)
@@ -502,23 +497,23 @@ function ask_length {			# ... select length
             outbase="${basedir}/${f}»${f_slug}"
             outfile="${outbase}.${outext}"
         	logfile="${outfile}.log"
-	        echo "Viddis.sh - Extraction & Conversion script (${scriptv})" | tee $logfile
-	        date   | tee -a $logfile
-	        echo -e "Processing files (${fCount} of ${nFiles}):  ${outfile}" | tee -a $logfile
-	        echo -e "\n\n\n+++++++++++++++++SELECTED OPTIONS:\n" | tee -a $logfile
-	        echo -e "\n\n\n+++++++++++++++++SOURCE FILE INFO:\n" >> $logfile
-		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format flat  >> $logfile
-	        echo -e "\n\n\n++++++++++++++++++++++++++RUNNING:\n\n" | tee -a $logfile
-	        time ffmpeg -hide_banner $o_ln -i "$f" -vf "${f_db}${f_di}${f_ar}${f_fr}${f_ss}${f_sh}setsar=sar=1/1,format=yuv420p" $o_fl $outvid -map_metadata 0 -metadata comment="${m_comment}" ${f_cr} "${outfile}" -y &>> $logfile
+	        echo "Viddis.sh - Extraction & Conversion script (${scriptv})" | tee "${logfile}"
+	        date   | tee -a "${logfile}"
+	        echo -e "Processing files (${fCount} of ${nFiles}):  ${outfile}" | tee -a "${logfile}"
+	        echo -e "\n\n\n+++++++++++++++++SELECTED OPTIONS:\n" | tee -a "${logfile}"
+	        echo -e "\n\n\n+++++++++++++++++SOURCE FILE INFO:\n" >> "${logfile}"
+		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format flat  >> "${logfile}"
+	        echo -e "\n\n\n++++++++++++++++++++++++++RUNNING:\n\n" | tee -a "${logfile}"
+	        time ffmpeg -hide_banner $o_ln -i "$f" -vf "${f_db}${f_di}${f_ar}${f_fr}${f_ss}${f_sh}setsar=sar=1/1,format=yuv420p" $o_fl $outvid -map_metadata 0 -metadata comment="${m_comment}" ${f_cr} "${outfile}" -y &>> "${logfile}"
 			if [ ! -z "$f_st" ]; then
-				ffmpeg -hide_banner -i "${outfile}" -vf vidstabdetect=shakiness=4:accuracy=15:result="transforms.trf" dummy.mp4 -y &>> $logfile
-				ffmpeg -hide_banner -i "${outfile}" -vf vidstabtransform $o_fl $outvid -map_metadata 0 "${outbase}_stab.${outext}" -y &>> $logfile
+				ffmpeg -hide_banner -i "${outfile}" -vf vidstabdetect=shakiness=4:accuracy=15:result="transforms.trf" dummy.mp4 -y &>> "${logfile}"
+				ffmpeg -hide_banner -i "${outfile}" -vf vidstabtransform $o_fl $outvid -map_metadata 0 "${outbase}_stab.${outext}" -y &>> "${logfile}"
 				rm -f dummy.mp4 transforms.trf "${outfile}"
 				mv "${outbase}_stab.${outext}" "${outfile}"
 			fi
-		   touch -r "$f" "${outfile}"  # preserve modification date
-	        echo -e "\n\n\n+++++++++++++++BATCH FINISHED++++++++++++" >> $logfile
-	        date >> $logfile
+		   touch -r "$f" "${outfile}"
+	        echo -e "\n\n\n+++++++++++++++BATCH FINISHED++++++++++++" >> "${logfile}"
+	        date >> "${logfile}"
         done
 		;;
 
@@ -538,36 +533,36 @@ function ask_length {			# ... select length
 	        out_m="${outdir}/x_metadata"
 	        mkdir -p "${out_m}"
 
-	        echo "Viddis.sh - Extraction & Conversion script (${scriptv})" | tee $logfile
-	        date   | tee -a $logfile
-	        echo -e "Processing files (${fCount} of ${nFiles}):  ${outfile}" | tee -a $logfile
-	        echo -e "\n\n\n+++++++++++++++++SELECTED OPTIONS:\n" | tee -a $logfile
-	        echo -e "\n\n\n+++++++++++++++++SOURCE FILE INFO:\n" >> $logfile
-		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format ini  >> $logfile
+	        echo "Viddis.sh - Extraction & Conversion script (${scriptv})" | tee "${logfile}"
+	        date   | tee -a "${logfile}"
+	        echo -e "Processing files (${fCount} of ${nFiles}):  ${outfile}" | tee -a "${logfile}"
+	        echo -e "\n\n\n+++++++++++++++++SELECTED OPTIONS:\n" | tee -a "${logfile}"
+	        echo -e "\n\n\n+++++++++++++++++SOURCE FILE INFO:\n" >> "${logfile}"
+		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format ini  >> "${logfile}"
 
             #...
             # ... metadata
-	        echo -e "\n\n\n++++++++++++++EXTRACTING METADATA:\n\n" | tee -a $logfile
+	        echo -e "\n\n\n++++++++++++++EXTRACTING METADATA:\n\n" | tee -a "${logfile}"
 		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format flat > "${out_m}/${f}.flat"
 		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format json > "${out_m}/${f}.json"
 		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format ini > "${out_m}/${f}.ini"
 
             #...
             # ... audio
-	        echo -e "\n\n\n+++++++++++++++++EXTRACTING AUDIO:\n\n" | tee -a $logfile
+	        echo -e "\n\n\n+++++++++++++++++EXTRACTING AUDIO:\n\n" | tee -a "${logfile}"
 		    echo -e "\n\n    Extracting audio from ${f}..."
 		    echo -e "\n\n  ⟹  PROCESSING AUDIO ${f}:" >> "${outdir}${logfile}"
-#		    ffmpeg -y -hide_banner -loglevel repeat+level+verbose -i ${f} ${outaud} 2>> $logfile
+#		    ffmpeg -y -hide_banner -loglevel repeat+level+verbose -i ${f} ${outaud} 2>> "${logfile}"
 
             #...
             # ... images		
-	        echo -e "\n\n\n+++++++++++++++++EXTRACTING AUDIO:\n\n" | tee -a $logfile
+	        echo -e "\n\n\n+++++++++++++++++EXTRACTING AUDIO:\n\n" | tee -a "${logfile}"
 		    fcount1=`ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 ${f}`
 		    echo -e "\n Number of frames to be extracted: ${fcount1}"
 #		    ffmpeg -y -hide_banner -i ${f} -vf ${f_db}${f_di}${f_fr}${f_ar}${f_ss}setsar=sar=1/1 ${outimg} ${out_i}$/{f}_%05d.$(outext)
 
-	        echo -e "\n\n\n+++++++++++++++BATCH FINISHED++++++++++++" >> $logfile
-	        date >> $logfile
+	        echo -e "\n\n\n+++++++++++++++BATCH FINISHED++++++++++++" >> "${logfile}"
+	        date >> "${logfile}"
         done
 		;;
 	  *)
