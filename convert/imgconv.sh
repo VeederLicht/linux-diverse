@@ -1,43 +1,38 @@
 #!/bin/bash
 
 
-# User information to inject in metadata
-m_composer=''
-m_copyright=''
-m_comment='Converted with imgconv.sh (RickOrchard@Github)'
-
-
-clear
-
-# Define constants
-scriptv="v1.70"
-sYe="\e[93m"
-sNo="\033[1;35m"
-logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
-
-# Show banner
-echo -e "\n ${sNo}"
-echo -e "  ======================================================================================================="
-echo -e "                Batch convert images using EXIF-data, RickOrchard 2022, no copyright"
-echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
-echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
-
-# Test nr. of arguments
-if [ $# -eq 0 ]
+####################  CHECK RUNCONDITIONS  ###############################
+if [ $# -eq 0 ]	# Test nr. of arguments
   then
     echo "        No source files specified."
 	exit 2
 fi
 
 
-echo -e "  =======================================================================================================" > $logfile
-echo -e "  -------------------------------------imgconv.sh $scriptv logfile---------------------------------------\n" >> $logfile
 
-	mkdir ./imgconv  2> /dev/null
-	base1="./imgconv/"
+####################  INITIALISATION & DEFINITIONS  ############################
+# Define constants
+scriptv="v2.0.0"
+sYe="\e[93m"
+sNo="\033[1;35m"
+logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
+
+# User information to inject in metadata
+m_composer=''
+m_copyright=''
+m_comment='Converted with imgconv.sh (RickOrchard@Github)'
 
 
-	# ... select output format
+function show_banner {
+	clear
+	echo -e "\n ${sNo}"
+	echo -e "  ===========================================IMGCONV================================================="
+	echo -e "                Batch convert images using EXIF-data, RickOrchard 2022, no copyright"
+	echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
+	echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
+}
+
+function select_output {
 	echo -e "\n"
 	echo -e "      SELECT OUTPUT FORMAT: "
 	echo -e "     (1) Convert to AVIF (av1, no support for metadata)"
@@ -48,10 +43,6 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 	echo -e ""
 	read -p "      --> " answer_format
 	echo -e ""
-	
-
-	clear
-	# ... select quality
 	echo -e "      SELECT QUALITY: "
 	echo -e "     (1) low quality"
 	echo -e "     (2) medium quality"
@@ -61,334 +52,334 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 	echo -e ""
 
 	case $answer_format in
-	  "1")
-        arg0="avif"
-        case $answer_quality in
-          "1")
-                arg9="-quality 45"
-            ;;
-
-          "2")
-                arg9="-quality 70"
-            ;;
-
-          "3")
-                arg9="-quality 95"
-            ;;
-        esac
+		"1")
+			arg0="avif"
+			case $answer_quality in
+				"1")
+					arg9="-quality 45"
+				;;
+				"2")
+					arg9="-quality 70"
+				;;
+				"3")
+					arg9="-quality 95"
+				;;
+			esac
 		;;
-	  "2")
-        arg0="webp"
-        case $answer_quality in
-          "1")
-                arg9="-define webp:preset=photo -quality 50"
-            ;;
-
-          "2")
-                arg9="-define webp:preset=photo -quality 75"
-            ;;
-
-          "3")
-                arg9="-define webp:preset=photo -quality 95"
-            ;;
-        esac
+		"2")
+			arg0="webp"
+			case $answer_quality in
+				"1")
+					arg9="-define webp:preset=photo -quality 60"
+				;;
+				"2")
+					arg9="-define webp:preset=photo -quality 80"
+				;;
+				"3")
+					arg9="-define webp:preset=photo -quality 95"
+				;;
+			esac
 		;;
-	  "3")
-        arg0="heic"
-        case $answer_quality in
-          "1")
-                arg9="-quality 35"
-            ;;
-
-          "2")
-                arg9="-quality 55"
-            ;;
-
-          "3")
-                arg9="-quality 95"
-            ;;
-        esac
+		"3")
+			arg0="heic"
+			case $answer_quality in
+				"1")
+					arg9="-quality 35"
+				;;
+				"2")
+					arg9="-quality 55"
+				;;
+				"3")
+					arg9="-quality 95"
+				;;
+			esac
 		;;
-	   "4")
-        arg0="png"
-        case $answer_quality in
-          "1")
-                arg9="-quality 40"
-            ;;
-
-          "2")
-                arg9="-quality 65"
-            ;;
-
-          "3")
-                arg9="-quality 95"
-            ;;
-        esac
+		"4")
+			arg0="png"
+			case $answer_quality in
+				"1")
+					arg9="-quality 40"
+				;;
+				"2")
+					arg9="-quality 65"
+				;;
+				"3")
+					arg9="-quality 95"
+				;;
+			esac
 		;;
-	  "5")
-        arg0="jpg"
-        case $answer_quality in
-          "1")
-                arg9="-quality 60"
-            ;;
-
-          "2")
-                arg9="-quality 75"
-            ;;
-
-          "3")
-                arg9="-quality 95"
-            ;;
-        esac
+		"5")
+			arg0="jpg"
+			case $answer_quality in
+				"1")
+					arg9="-quality 60"
+				;;
+				"2")
+					arg9="-quality 75"
+				;;
+				"3")
+					arg9="-quality 95"
+				;;
+			esac
 		;;
-	  *)
-		echo "Unknown option, exiting..."
-		exit 3
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
 		;;
 	esac
-    echo -e "  -----------------Convert to [ $arg0 ] with [ $arg9 ] \n" >> $logfile
+	echo -e "  -----------------Convert to [ $arg0 ] with [ $arg9 ] \n" >> $logfile
+}
 
-
-
-
-
-	clear
-	# ... rename output
-	echo -e "      SHOW EXTRA EXPORT OPTIONS? "
-	echo -e "     (1) no"
-	echo -e "     (2) yes"
+function prepend_text {
+	echo -e "      PREPEND EXIF-DATE TO FILENAMES? "
+	echo -e "     (0) no"
+	echo -e "     (1) yes"
 	echo -e ""
 	read -p "      --> " answer_rename
 	echo -e ""
-
+	
 	case $answer_rename in
-	  "1")
-			echo -e "  ----------------No extra options \n" >> $logfile
-		    fname=""
-			arg1=""
-			arg2=""
-			arg3=""
-			arg4=""
+		""|"0")
+			prepend=false
 		;;
-	  "2")
-			# ... rename output
-			echo -e "      APPEND CUSTOM TEXT TO FILENAMES? "
-			echo -e "     (1) no"
-			echo -e "     (2) yes"
-			echo -e ""
-			read -p "      --> " answer_rename
-			echo -e ""
-
-
-			case $answer_rename in
-			  "1")
-				    fname=""
-				;;
-			  "2")
-				    read -p "      Type your custum filename: " fname
-				    echo -e ""
-				;;
-			  *)
-				echo "Unknown option, exiting..."
-				exit 3
-				;;
-			esac
-			echo -e "  ----------------[ $arg1 ]  \n" >> $logfile
-
-
-
-
-			clear
-			# ... select noise reduction
-			echo -e "\n"
-			echo -e "      SELECT DENOISING LEVEL: "
-			echo -e "      (the smaller the image, the stronger the denoising effects)"
-			echo -e "     (0) none"
-			echo -e "     (1) low"
-			echo -e "     (2) medium"
-			echo -e "     (3) very high"
-			echo -e "     (4) cartoonize"
-			echo -e ""
-			read -p "      --> " answer_noise
-			echo -e ""
-
-			case $answer_noise in
-			  "0")
-				echo -e "  -----------------No noise reduction \n" >> $logfile
-				arg1=""
-				;;
-			  "1")
-				arg1="-bilateral-blur 3"
-				;;
-			   "2")
-				arg1="-kuwahara 0.5 -wavelet-denoise 0.5%"
-				;;
-			  "3")
-				arg1="-despeckle"
-				;;
-			  "4")
-				arg1="-kuwahara 3"
-				;;
-			  *)
-				echo "Unknown option, exiting..."
-				exit 3
-				;;
-			esac
-			echo -e "  ----------------[ $arg1 ]  \n" >> $logfile
-
-
-
-
-			clear
-			# ... select sharpening
-			echo -e "      SELECT SHARPENING LEVEL: "
-			echo -e "     (0) none"
-			echo -e "     (1) light"
-			echo -e "     (2) medium"
-			echo -e "     (3) strong"
-			echo -e ""
-			read -p "      --> " answer_sharpen
-			echo -e ""
-
-			case $answer_sharpen in
-			  "0")
-				arg2=""
-				;;
-			  "1")
-				arg2="-adaptive-sharpen 0"
-				;;
-			  "2")
-				arg2="-sharpen 0"
-				;;
-			  "3")
-				arg2=" -adaptive-sharpen 0 -sharpen 0"
-				;;
-			  *)
-				echo "Unknown option, exiting..."
-				exit 3
-				;;
-			esac
-			echo -e "  ----------------[ $arg2 ]  \n" >> $logfile
-
-
-
-			clear
-			# ... select resize
-			echo -e "      SELECT RESIZING: "
-			echo -e "     (0) no, keep original"
-			echo -e "     (1) 320p (thumbnail)"
-			echo -e "     (2) 720p (SD)"
-			echo -e "     (3) 1280p (HD)"
-			echo -e "     (4) 2560p (2K)"
-			echo -e "     (5) 3840p (4K)"
-			echo -e ""
-			read -p "      --> " answer_size
-			echo -e ""
-
-			case $answer_size in
-				"0")
-				arg3=""
-				;;
-				"1")
-				arg3="-resize 320x320 -filter Lanczos"
-				;;
-			   "2")
-				arg3="-resize 720x720 -filter Lanczos"
-				;;
-			   "3")
-				arg3="-resize 1280x1280 -filter Lanczos"
-				;;
-			   "4")
-				arg3="-resize 2560x2560 -filter Lanczos"
-				;;
-			   "5")
-				arg3="-resize 3840x3840 -filter Lanczos"
-				;;
-			  *)
-				echo "Unknown option, exiting..."
-				exit 3
-				;;
-			esac
-			echo -e "  ----------------[ $arg3 ]  \n" >> $logfile
-
-
-
-			clear
-			# ... select contrast
-			echo -e "      SELECT CONTRAST ENHANCEMENT"
-			echo -e "     (0) none, keep original"
-			echo -e "     (1) normalize"
-			echo -e "     (2) extra contrast"
-			echo -e ""
-			read -p "      --> " answer_contrast
-			echo -e ""
-
-			case $answer_contrast in
-			  "0")
-				arg4=""
-				;;
-			  "1")
-				arg4="-normalize"
-				;;
-			  "2")
-				arg4="-sigmoidal-contrast 1x20% -sigmoidal-contrast 1x55% -modulate 100,85 -normalize"
-				;;
-			  *)
-				echo "Unknown option, exiting..."
-				exit 3
-				;;
-			esac
-			echo -e "  ----------------[ $arg4 ] \n" >> $logfile
+		"1")
+			prepend=true
 		;;
-	  *)
-		echo "Unknown option, exiting..."
-		exit 3
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
 		;;
 	esac
+	echo -e "  ----------------[ $prepend ]  \n" >> $logfile
+}
 
-
-
-
-	clear
-	# ... preserve METADATA, if no -> actively erases ALL metadata!
-	echo -e "\n"
+function append_text {
+	echo -e "      APPEND CUSTOM TEXT TO FILENAMES? "
+	echo -e "     (0) no"
+	echo -e "     (1) yes"
 	echo -e ""
+	read -p "      --> " answer_rename
+	echo -e ""
+	
+	case $answer_rename in
+		""|"0")
+			append="imgconv"
+		;;
+		"1")
+			read -p "      Type your custum filename: " append
+			echo -e ""
+		;;
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
+		;;
+	esac
+	echo -e "  ----------------[ $append ]  \n" >> $logfile
+}
+
+function select_denoising {
+	echo -e "      SELECT DENOISING LEVEL: "
+	echo -e "      (the smaller the image, the stronger the denoising effects)"
+	echo -e "     (0) none"
+	echo -e "     (1) low"
+	echo -e "     (2) medium"
+	echo -e "     (3) very high"
+	echo -e "     (4) cartoonize"
+	echo -e ""
+	read -p "      --> " answer_noise
+	echo -e ""
+
+	case $answer_noise in
+		""|"0")
+			echo -e "  -----------------No noise reduction \n" >> $logfile
+			arg1=""
+		;;
+		"1")
+			arg1="-bilateral-blur 3"
+		;;
+		"2")
+			arg1="-kuwahara 0.5 -wavelet-denoise 0.5%"
+		;;
+		"3")
+			arg1="-despeckle"
+		;;
+		"4")
+			arg1="-kuwahara 3"
+		;;
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
+		;;
+	esac
+	echo -e "  ----------------[ $arg1 ]  \n" >> $logfile
+}
+
+function select_sharpen {
+	echo -e "      SELECT SHARPENING LEVEL: "
+	echo -e "     (0) none"
+	echo -e "     (1) light"
+	echo -e "     (2) medium"
+	echo -e "     (3) strong"
+	echo -e ""
+	read -p "      --> " answer_sharpen
+	echo -e ""
+
+	case $answer_sharpen in
+		""|"0")
+			arg2=""
+		;;
+		"1")
+			arg2="-adaptive-sharpen 0"
+		;;
+		"2")
+			arg2="-sharpen 0"
+		;;
+		"3")
+			arg2=" -adaptive-sharpen 0 -sharpen 0"
+		;;
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
+		;;
+	esac
+	echo -e "  ----------------[ $arg2 ]  \n" >> $logfile
+}
+
+function select_resize {
+	echo -e "      SELECT RESIZING: "
+	echo -e "     (0) no, keep original"
+	echo -e "     (1) 320p (thumbnail)"
+	echo -e "     (2) 720p (SD)"
+	echo -e "     (3) 1280p (HD)"
+	echo -e "     (4) 2560p (2K)"
+	echo -e "     (5) 3840p (4K)"
+	echo -e ""
+	read -p "      --> " answer_size
+	echo -e ""
+
+	case $answer_size in
+		""|"0")
+			arg3=""
+		;;
+		"1")
+			arg3="-resize 320x320 -filter Lanczos"
+		;;
+		"2")
+			arg3="-resize 720x720 -filter Lanczos"
+		;;
+		"3")
+			arg3="-resize 1280x1280 -filter Lanczos"
+		;;
+		"4")
+			arg3="-resize 2560x2560 -filter Lanczos"
+		;;
+		"5")
+			arg3="-resize 3840x3840 -filter Lanczos"
+		;;
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
+		;;
+	esac
+	echo -e "  ----------------[ $arg3 ]  \n" >> $logfile
+}
+
+function select_contrast {
+	echo -e "      SELECT CONTRAST ENHANCEMENT"
+	echo -e "     (0) none, keep original"
+	echo -e "     (1) normalize"
+	echo -e "     (2) extra contrast"
+	echo -e ""
+	read -p "      --> " answer_contrast
+	echo -e ""
+
+	case $answer_contrast in
+		""|"0")
+			arg4=""
+		;;
+		"1")
+			arg4="-normalize"
+		;;
+		"2")
+			arg4="-sigmoidal-contrast 1x20% -sigmoidal-contrast 1x55% -modulate 100,85 -normalize"
+		;;
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
+		;;
+	esac
+	echo -e "  ----------------[ $arg4 ] \n" >> $logfile
+}
+
+function preserve_meta {
 	echo -e "      Copy METADATA?"
 	echo -e "     (1) yes"
-	echo -e "     (2) no, clean all tags"
+	echo -e "     (2) no, erase all tags"
 	echo -e ""
 	read -p "      --> " include_meta
 	echo -e ""
 
-    if [ $include_meta = "1" ]; then
+	if [ $include_meta = "1" ]; then
 		echo -e "  ----------------Including metadata \n" >> $logfile
-    fi
+	fi
+}
+
+#################### RUN PROGRAM #################################
+echo -e "  =======================================================================================================" > "${logfile}"
+echo -e "  -------------------------------------imgconv.sh $scriptv logfile---------------------------------------\n" >> "${logfile}"
+show_banner
+echo -e "\n\n   INPUT FILES:\n"
+nFiles=0
+for f in "$@"
+do
+	echo -e "    ✻ ${f}"
+	((nFiles++))
+done
+echo -e "\n   TOTAL COUNT: ${nFiles}\n\n"
+select_output
+show_banner
+prepend_text
+append_text
+show_banner
+select_denoising
+show_banner
+select_sharpen
+show_banner
+select_resize
+show_banner
+select_contrast
+show_banner
+preserve_meta
+show_banner
 
 
-
-
-
-# LET'S GET TO WORK
-
-counter=1
+basedir="./imgconv_out"
+rm -Rf "${basedir}"
+mkdir -p "${basedir}"
+fCount=0
 
 for f in "$@"
 do
-	makeDate=$(exiv2 -Pv -K Exif.Photo.DateTimeDigitized $f | sed 's/://g' | sed 's/ /_/g')
-	camMake=$(exiv2 -Pv -K Exif.Image.Make $f | sed 's/://g' | sed 's/ /_/g')
-	camModel=$(exiv2 -Pv -K Exif.Image.Model $f | sed 's/://g' | sed 's/ /_/g')
-	outfile="$base1"$makeDate»$camMake_$camModel»$fname»$f.$arg0
-    counter=$((counter+1))
-	echo -e " "
-	echo -e "........................Processing "$f"...to...$outfile................"
+	((fCount++))
+	echo -e "\n......................Processing file (${fCount} of ${nFiles}):  ${outfile}" | tee -a "${logfile}"
+	makeDate=$(exiv2 -Pv -K Exif.Photo.DateTimeDigitized "${f}" | sed 's/://g' | sed 's/ /_/g')
+	camMake=$(exiv2 -Pv -K Exif.Image.Make "${f}" | sed 's/://g' | sed 's/ /_/g')
+	camModel=$(exiv2 -Pv -K Exif.Image.Model "${f}"| sed 's/://g' | sed 's/ /_/g')
+	if [ $prepend = true ]
+	then
+		outfile="${basedir}/${makeDate}»${camMake}_${camModel}»${append}»${f}.${arg0}"
+	else
+		outfile="${basedir}/${f}»${append}.${arg0}"
+	fi
 	echo -e ".\n.\n.\n." >> $logfile
-    convert "$f" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg9 -verbose "$outfile"
-    if [ $include_meta = "1" ]
-    then
-        exiv2 -ea- "$f" | exiv2 -ia- "$outfile" &>> $logfile
-    else
-    	exiv2 -d a "$outfile" &>> $logfile
-    fi
+	convert "$f" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg9 -verbose "$outfile"
+	if [ $include_meta = "1" ]
+	then
+		exiv2 -ea- "$f" | exiv2 -ia- "$outfile" &>> $logfile
+	else
+		exiv2 -d a "$outfile" &>> $logfile
+	fi
+	#touch -r "$f" "${outfile}"
 done
 
 
