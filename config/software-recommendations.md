@@ -4,6 +4,7 @@
     
     
     ### COMMAND LINE TOOLS
+    . alacritty (terminal emulator (GPU))
     . ranger   (file manager)
     . btop  (htop alternative)
     . gdu   (disk usage, 'baobab')
