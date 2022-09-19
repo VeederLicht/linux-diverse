@@ -1,6 +1,7 @@
     #### FONTS
     . Gabriela
     . Gentium Basic
+    . arima madurai
     
     
     ### COMMAND LINE TOOLS
