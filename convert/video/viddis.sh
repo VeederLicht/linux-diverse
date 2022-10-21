@@ -3,7 +3,7 @@
 clear
 
 # Define constants
-scriptv="v2.4.8-alpha"
+scriptv="v2.4.9-alpha"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
@@ -63,12 +63,12 @@ function ask_convert_quality {		# ... picture quality
 		o_fl="-movflags +faststart"
 		;;
 		"3")
-		outvid="-c:v libsvtav1 -b:v 0 -qp 32 -preset 7 -c:a libopus -b:a 128k"
+		outvid="-c:v libsvtav1 -b:v 0 -qp 32 -preset 7 -c:a libopus -b:a 96k"
 		outext="av1.mp4"
 		o_fl=""
 		;;
 		"4")
-		outvid="-c:v libsvtav1 -qp 45 -preset 7 -c:a libopus -b:a 96k"
+		outvid="-c:v libsvtav1 -qp 37 -preset 7 -c:a libopus -b:a 64k"
 		outext="av1.mp4"
 		o_fl=""
 		;;
