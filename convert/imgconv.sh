@@ -12,7 +12,7 @@ fi
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v2.0.0"
+scriptv="v2.4.0"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -150,7 +150,7 @@ function prepend_text {
 			exit 3
 		;;
 	esac
-	echo -e "  ----------------[ $prepend ]  \n" >> $logfile
+	echo -e "  ----------------prepend[ $prepend ]  \n" >> $logfile
 }
 
 function append_text {
@@ -174,7 +174,7 @@ function append_text {
 			exit 3
 		;;
 	esac
-	echo -e "  ----------------[ $append ]  \n" >> $logfile
+	echo -e "  ----------------append[ $append ]  \n" >> $logfile
 }
 
 function select_denoising {
@@ -211,7 +211,7 @@ function select_denoising {
 			exit 3
 		;;
 	esac
-	echo -e "  ----------------[ $arg1 ]  \n" >> $logfile
+	echo -e "  ----------------arg1[ $arg1 ]  \n" >> $logfile
 }
 
 function select_sharpen {
@@ -242,17 +242,17 @@ function select_sharpen {
 			exit 3
 		;;
 	esac
-	echo -e "  ----------------[ $arg2 ]  \n" >> $logfile
+	echo -e "  ----------------arg2[ $arg2 ]  \n" >> $logfile
 }
 
 function select_resize {
-	echo -e "      SELECT RESIZING: "
-	echo -e "     (0) no, keep original"
-	echo -e "     (1) 320p (thumbnail)"
-	echo -e "     (2) 720p (SD)"
-	echo -e "     (3) 1280p (HD)"
-	echo -e "     (4) 2560p (2K)"
-	echo -e "     (5) 3840p (4K)"
+	echo -e "      SELECT OUTPUT SIZE: "
+	echo -e "     (0) keep original"
+	echo -e "     (1) 240p (thumbnail)"
+	echo -e "     (2) 480p (SD)"
+	echo -e "     (3) 720p (HD)"
+	echo -e "     (4) 1440p (QHD)"
+	echo -e "     (5) 2160p (UHD)"
 	echo -e ""
 	read -p "      --> " answer_size
 	echo -e ""
@@ -262,26 +262,26 @@ function select_resize {
 			arg3=""
 		;;
 		"1")
-			arg3="-resize 320x320 -filter Lanczos"
+			arg3="-resize 240x240^ -filter Lanczos"
 		;;
 		"2")
-			arg3="-resize 720x720 -filter Lanczos"
+			arg3="-resize 480x480^ -filter Lanczos"
 		;;
 		"3")
-			arg3="-resize 1280x1280 -filter Lanczos"
+			arg3="-resize 720x720^ -filter Lanczos"
 		;;
 		"4")
-			arg3="-resize 2560x2560 -filter Lanczos"
+			arg3="-resize 1440x1440^ -filter Lanczos"
 		;;
 		"5")
-			arg3="-resize 3840x3840 -filter Lanczos"
+			arg3="-resize 2160x2160^ -filter Lanczos"
 		;;
 		*)
 			echo "Unknown option, exiting..."
 			exit 3
 		;;
 	esac
-	echo -e "  ----------------[ $arg3 ]  \n" >> $logfile
+	echo -e "  ----------------arg3[ $arg3 ]  \n" >> $logfile
 }
 
 function select_contrast {
@@ -308,7 +308,35 @@ function select_contrast {
 			exit 3
 		;;
 	esac
-	echo -e "  ----------------[ $arg4 ] \n" >> $logfile
+	echo -e "  ----------------arg4[ $arg4 ] \n" >> $logfile
+}
+
+
+function select_waifu2x {
+	echo -e "     USE RESOLUTION ENHANCEMENT (WAIFU2X): "
+	echo -e "     (0) no"
+	echo -e "     (1) yes, 2X"
+	echo -e "     (2) yes, 4X"
+	echo -e ""
+	read -p "      --> " answer_size
+	echo -e ""
+
+	case $answer_size in
+		""|"0")
+			arg5=""
+		;;
+		"1")
+			arg5=2
+		;;
+		"2")
+			arg5=4
+		;;
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
+		;;
+	esac
+	echo -e "  ----------------arg5[ $arg5 ]  \n" >> $logfile
 }
 
 function preserve_meta {
@@ -330,8 +358,7 @@ echo -e "  -------------------------------------imgconv.sh $scriptv logfile-----
 show_banner
 echo -e "\n\n   INPUT FILES:\n"
 nFiles=0
-for f in "$@"
-do
+for f in "$@"; do
 	echo -e "    ✻ ${f}"
 	((nFiles++))
 done
@@ -345,11 +372,13 @@ select_denoising
 show_banner
 select_sharpen
 show_banner
-select_resize
-show_banner
 select_contrast
 show_banner
+select_waifu2x
+show_banner
 preserve_meta
+show_banner
+select_resize
 show_banner
 
 
@@ -365,21 +394,27 @@ do
 	makeDate=$(exiv2 -Pv -K Exif.Photo.DateTimeDigitized "${f}" | sed 's/://g' | sed 's/ /_/g')
 	camMake=$(exiv2 -Pv -K Exif.Image.Make "${f}" | sed 's/://g' | sed 's/ /_/g')
 	camModel=$(exiv2 -Pv -K Exif.Image.Model "${f}"| sed 's/://g' | sed 's/ /_/g')
-	if [ $prepend = true ]
-	then
+	if [ $prepend = true ]; then
 		outfile="${basedir}/${makeDate}»${camMake}_${camModel}»${append}»${f}.${arg0}"
 	else
 		outfile="${basedir}/${f}»${append}.${arg0}"
 	fi
 	echo -e ".\n.\n.\n." >> $logfile
-	convert "$f" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg9 -verbose "$outfile"
-	if [ $include_meta = "1" ]
-	then
+	if [ $arg5 -gt 0 ]; then
+		waifu2x-ncnn-vulkan -i "$f" -o tmp.jpg -s $arg5
+		infile="tmp.jpg"
+	else
+		infile="$f"
+	fi
+	convert "$infile" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg9 -verbose "$outfile" | tee -a "${logfile}"
+	rm -f tmp.jpg
+
+	if [ $include_meta = "1" ]; then
 		exiv2 -ea- "$f" | exiv2 -ia- "$outfile" &>> $logfile
+		touch -r "$f" "${outfile}"
 	else
 		exiv2 -d a "$outfile" &>> $logfile
 	fi
-	#touch -r "$f" "${outfile}"
 done
 
 
