@@ -3,7 +3,7 @@
 clear
 
 # Define constants
-scriptv="v2.4.9-alpha"
+scriptv="v2.5.0-beta"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
@@ -73,12 +73,12 @@ function ask_convert_quality {		# ... picture quality
 		o_fl=""
 		;;
 		"5")
-		outvid="-gpu 0 -c:v h264_nvenc -preset slow -profile:v high -cq 28 -c:a aac -b:a 256k"
+		outvid="-gpu 0 -c:v h264_nvenc -preset slow -profile:v high -cq 31 -c:a aac -b:a 192k"
 		outext="h264.mp4"
 		o_fl="-movflags +faststart"
 		;;
 		"6")
-		outvid="-gpu 0 -c:v hevc_nvenc -preset slow -tier high -cq 32 -c:a aac -b:a 256k"
+		outvid="-gpu 0 -c:v hevc_nvenc -preset slow -tier high -cq 33 -c:a aac -b:a 192k"
 		outext="h265.mp4"
 		o_fl="-movflags +faststart"
 		;;
@@ -111,55 +111,28 @@ function ask_file_append {		# append slug to filename
 		fi
 }
 
-function ask_extract_audio {		# ... extract audio?
-        clear
-        echo -e "\n\n"
-	    echo -e "Extract audio:"
-	    echo -e "    [0] original (effects not possible)"
-	    echo -e "    [1] FLAC"
-	    read -p "(0-1): " answer1
-
-	    case $answer1 in
-	      "0")
-		    outaud="-vn -acodec copy ${out_a}${f}.mka"
-		    ;;
-	      "1")
-		    outaud="-vn -acodec flac -compression_level 3 ${out_a}${f}.flac"
-		    ;;
-	      *)
-		    echo "Invalid answer, exiting..."
-		    exit 6
-		    ;;
-	    esac
-}
 
 function ask_extract_video {        # ... picture quality
         clear
 	    echo -e "Extract video stream to:"
 	    echo -e "    [0] JGP    (normal quality)"
 	    echo -e "    [1] JGP    (high quality)"
-	    echo -e "    [2] M4V    (H264, hq, no audio)"
-	    echo -e "    [3] MKV    (original, no audio)"
+	    echo -e "    [2] MKV    (original, no audio)"
 	    read -p "(0-3): " answer1
 
 	    case $answer1 in
 	      "0")
-		    outimg="-an -q:v 5"
+		    f_img="-an -q:v 5"
             outext="jpg"
             o_fl=""
 		    ;;
 	      "1")
-		    outimg="-an -q:v 2"
+		    f_img="-an -q:v 2"
             outext="jpg"
             o_fl=""
 		    ;;
 	      "2")
-		    outimg="-an -c:v libx264 -preset:v slow -profile:v high -tune grain -crf 17 -forced-idr true"
-            outext="m4v"
-            o_fl="-movflags frag_keyframe+empty_moov"
-		    ;;
-	      "3")
-		    outimg="-an -c:v copy"
+		    f_img="-an -c:v copy"
             outext="mkv"
             o_fl=""
 		    ;;
@@ -460,7 +433,6 @@ function ask_length {			# ... select length
 
       # DISSECT SPECIFIC OPTIONS
 	  "1")
-			ask_extract_audio
 			ask_extract_video
 			ask_aspect_ratio
 			ask_resolution
@@ -535,31 +507,29 @@ function ask_length {			# ... select length
 
 	        echo "Viddis.sh - Extraction & Conversion script (${scriptv})" | tee "${logfile}"
 	        date   | tee -a "${logfile}"
-	        echo -e "Processing files (${fCount} of ${nFiles}):  ${outfile}" | tee -a "${logfile}"
+	        echo -e "Processing files (${fCount} of ${nFiles}):  ${f}" | tee -a "${logfile}"
 	        echo -e "\n\n\n+++++++++++++++++SELECTED OPTIONS:\n" | tee -a "${logfile}"
-	        echo -e "\n\n\n+++++++++++++++++SOURCE FILE INFO:\n" >> "${logfile}"
-		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format ini  >> "${logfile}"
 
-            #...
-            # ... metadata
+
+            # .................... metadata
 	        echo -e "\n\n\n++++++++++++++EXTRACTING METADATA:\n\n" | tee -a "${logfile}"
 		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format flat > "${out_m}/${f}.flat"
 		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format json > "${out_m}/${f}.json"
 		    ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format ini > "${out_m}/${f}.ini"
 
-            #...
-            # ... audio
-	        echo -e "\n\n\n+++++++++++++++++EXTRACTING AUDIO:\n\n" | tee -a "${logfile}"
-		    echo -e "\n\n    Extracting audio from ${f}..."
-		    echo -e "\n\n  ⟹  PROCESSING AUDIO ${f}:" >> "${outdir}${logfile}"
-#		    ffmpeg -y -hide_banner -loglevel repeat+level+verbose -i ${f} ${outaud} 2>> "${logfile}"
 
-            #...
-            # ... images		
+            # .................... audio
 	        echo -e "\n\n\n+++++++++++++++++EXTRACTING AUDIO:\n\n" | tee -a "${logfile}"
+		    ffmpeg -y -hide_banner -loglevel repeat+level+verbose -i ${f} -vn -acodec copy ${out_a}/${f}.mka | tee "${logfile}"
+
+
+            # .................... images
+	        echo -e "\n\n\n+++++++++++++++++EXTRACTING VIDEO:\n\n" | tee -a "${logfile}"
 		    fcount1=`ffprobe -v fatal -count_frames -select_streams v:0 -show_entries stream=nb_read_frames -of default=nokey=1:noprint_wrappers=1 ${f}`
 		    echo -e "\n Number of frames to be extracted: ${fcount1}"
-#		    ffmpeg -y -hide_banner -i ${f} -vf ${f_db}${f_di}${f_fr}${f_ar}${f_ss}setsar=sar=1/1 ${outimg} ${out_i}$/{f}_%05d.$(outext)
+		    outfile=${out_i}/${f}_%05d.${outext}
+		    echo $outfile
+		    ffmpeg -y -hide_banner -i ${f} -vf "${f_db}${f_di}${f_ar}${f_fr}${f_ss}${f_sh}setsar=sar=1/1,format=yuv420p" ${f_img} ${outfile} | tee "${logfile}"
 
 	        echo -e "\n\n\n+++++++++++++++BATCH FINISHED++++++++++++" >> "${logfile}"
 	        date >> "${logfile}"
@@ -574,7 +544,7 @@ function ask_length {			# ... select length
 
 # ... finish up
 
-clear
+# clear
 echo -e "\n\n\n ${sYe} Finished. ${sNo} \n\n"
 echo -e "Start time:  ${startTime} \n\n"
 echo -e "Start time:  $(date) \n\n"
