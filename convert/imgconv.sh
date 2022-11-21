@@ -12,7 +12,7 @@ fi
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v2.4.0"
+scriptv="v2.4.1"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -115,7 +115,7 @@ function select_output {
 					arg9="-quality 60"
 				;;
 				"2")
-					arg9="-quality 75"
+					arg9="-quality 80"
 				;;
 				"3")
 					arg9="-quality 95"
