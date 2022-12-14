@@ -2,7 +2,7 @@
 
 
 ####################  CHECK RUNCONDITIONS  ###############################
-if [ $# -eq 0 ]	# Test nr. of arguments
+if [[ $# -eq 0 ]]	# Test nr. of arguments
   then
     echo "        No source files specified."
 	exit 2
@@ -12,7 +12,7 @@ fi
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v2.4.1"
+scriptv="v2.4.5"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -56,13 +56,13 @@ function select_output {
 			arg0="avif"
 			case $answer_quality in
 				"1")
-					arg9="-quality 45"
+					arg9="-quality 40"
 				;;
 				"2")
-					arg9="-quality 70"
+					arg9="-quality 60"
 				;;
 				"3")
-					arg9="-quality 95"
+					arg9="-quality 90"
 				;;
 			esac
 		;;
@@ -70,7 +70,7 @@ function select_output {
 			arg0="webp"
 			case $answer_quality in
 				"1")
-					arg9="-define webp:preset=photo -quality 60"
+					arg9="-define webp:preset=photo -quality 50"
 				;;
 				"2")
 					arg9="-define webp:preset=photo -quality 80"
@@ -84,13 +84,13 @@ function select_output {
 			arg0="heic"
 			case $answer_quality in
 				"1")
-					arg9="-quality 35"
+					arg9="-quality 25"
 				;;
 				"2")
 					arg9="-quality 55"
 				;;
 				"3")
-					arg9="-quality 95"
+					arg9="-quality 90"
 				;;
 			esac
 		;;
@@ -347,7 +347,7 @@ function preserve_meta {
 	read -p "      --> " include_meta
 	echo -e ""
 
-	if [ $include_meta = "1" ]; then
+	if [[ $include_meta = "1" ]]; then
 		echo -e "  ----------------Including metadata \n" >> $logfile
 	fi
 }
@@ -394,13 +394,13 @@ do
 	makeDate=$(exiv2 -Pv -K Exif.Photo.DateTimeDigitized "${f}" | sed 's/://g' | sed 's/ /_/g')
 	camMake=$(exiv2 -Pv -K Exif.Image.Make "${f}" | sed 's/://g' | sed 's/ /_/g')
 	camModel=$(exiv2 -Pv -K Exif.Image.Model "${f}"| sed 's/://g' | sed 's/ /_/g')
-	if [ $prepend = true ]; then
+	if [[ $prepend = true ]]; then
 		outfile="${basedir}/${makeDate}»${camMake}_${camModel}»${append}»${f}.${arg0}"
 	else
 		outfile="${basedir}/${f}»${append}.${arg0}"
 	fi
 	echo -e ".\n.\n.\n." >> $logfile
-	if [ $arg5 -gt 0 ]; then
+	if [[ $arg5 -gt 0 ]]; then
 		waifu2x-ncnn-vulkan -i "$f" -o tmp.jpg -s $arg5
 		infile="tmp.jpg"
 	else
@@ -409,7 +409,7 @@ do
 	convert "$infile" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg9 -verbose "$outfile" | tee -a "${logfile}"
 	rm -f tmp.jpg
 
-	if [ $include_meta = "1" ]; then
+	if [[ $include_meta = "1" ]]; then
 		exiv2 -ea- "$f" | exiv2 -ia- "$outfile" &>> $logfile
 		touch -r "$f" "${outfile}"
 	else
