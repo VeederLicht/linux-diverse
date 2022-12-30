@@ -1,7 +1,10 @@
-    #### FONTS
+    ### FONTS
     . Gabriela
     . Gentium Basic
     . arima madurai
+    
+    ### THEMES
+    . GTK -> AmberChrome + matefaenza icons
     
     
     ### COMMAND LINE TOOLS
