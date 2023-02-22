@@ -21,6 +21,7 @@
 
     ### SYSTEM TOOLS
     . kgpg   (gpg key manager (good!))
+    . builder (gnome, great editor!)
     . krita/kwrite  (text editor)
     . smb4k   (smb shares browser)
     . kfind/catfish/fsearch/docfetcher  (find files)!
