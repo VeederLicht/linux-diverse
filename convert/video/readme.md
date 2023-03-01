@@ -127,6 +127,7 @@ ffmpeg -r 25 -i frames/frame_%04d.png -i "Bonobo - Kong.mp3" -c:v libx264 -c:a c
 ```
 ffmpeg.exe -i .\vid1.m4v -i .\vid2.mp4 -map 1:v -map 0:a -map 0:s -c:v copy -c:a copy -c:s copy out.mp4
 ```
+See also: https://trac.ffmpeg.org/wiki/Map
 
 
 ### Pre/postprocess
