@@ -122,6 +122,13 @@ ffmpeg -r 25 -i frames/frame_%04d.png -i "Bonobo - Kong.mp3" -c:v libx264 -c:a c
 -c:v hevc_nvenc -preset slow -cbr true -b:v 1.5M -c:a aac -b:a 196k
 ```
 
+
+#### C09. Combine streams from different files; video, audio & subtitles
+```
+ffmpeg.exe -i .\vid1.m4v -i .\vid2.mp4 -map 1:v -map 0:a -map 0:s -c:v copy -c:a copy -c:s copy out.mp4
+```
+
+
 ### Pre/postprocess
 
 #### P01. ... to DNxHR (_lb, _sq, _hq, _hqx, _444)
