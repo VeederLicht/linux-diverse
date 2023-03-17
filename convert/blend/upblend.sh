@@ -10,7 +10,7 @@ m_year=''
 clear
 
 # Define constants
-scriptv="v2.0"
+scriptv="v2.1"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"upblend.rep"
@@ -51,22 +51,31 @@ then
 fi
 
 
+# »»»»»»»»»»»»»»»»»» DIALOG
+echo -e ""
+read -p "      Enter the size of each image stack:" answer_size
+echo -e ""
+if ! [[ "$answer_size" =~ ^[0-9]+$ ]]; then
+	echo -e "    ERROR:  Enter whole numbers only, exiting...."
+	exit
+fi
+
+echo -e ""
+read -p "      Upscale (2x) resulting images? [y/n]:" answer_upscale
+echo -e ""
+if [ $answer_upscale = "y" ]; then
+	echo -e "    ...upscaling selected."
+else
+	echo -e "    ...skip upscaling."
+fi
+
+
+# »»»»»»»»»»»»»»»»»» EXECUTION
 iStart=$(date +%s)
 usdir=./upblend.d
 tmpdir=$usdir/0.tmp
 blenddir=$usdir/1.blended
 scaledir=$usdir/2.scaled
-
-
-echo -e ""
-read -p "      Enter the size of each image stack:" answer_size
-echo -e ""
-if ! [[ "$answer_size" =~ ^[0-9]+$ ]]
-	then
-		echo -e "    ERROR:  Enter whole numbers only, exiting...."
-		exit
-fi
-
 rm -Rf $usdir
 mkdir -p $tmpdir
 mkdir -p $blenddir
@@ -82,7 +91,7 @@ echo -e "-------$f"
 	cp "$f" $tmpdir/
 	if [ $count -eq $answer_size ]
 	then
-		align_image_stack --gpu -a "${tmpdir}/"aligned -C "${tmpdir}/"*
+		align_image_stack --gpu -i -d -C -v -a "${tmpdir}/"aligned "${tmpdir}/"*
 		outfile="${blenddir}/${f}#enfused.jpg"
 		enfuse --compression=90 --verbose=0 --exposure-weight-function=gaussian --output="${outfile}" "${tmpdir}/"*.tif
 		exiv2 rm "${outfile}"
@@ -98,22 +107,22 @@ echo -e "-------$f"
 done
 
 
-
+if [ $answer_upscale = "y" ]; then
 # UPSCALE, nog aanpassen naar brondirectory, evt EXIF kopieren
-for f in "${blenddir}/"*
-do
-	infile=$(basename -- "${f}")
-	outfile="${scaledir}/${infile}#w2x.jpg"
-	echo -e "\e[0m »»» Upscaling using waifu2x: \e[1m $infile... \e[2m"
-	waifu2x-ncnn-vulkan -i "$f" -s 2 -f jpg -o "${outfile}"
-	exiv2 rm "${outfile}"
-	exiv2 -ea- "$f" | exiv2 -ia- "${outfile}"
-	if [ $? -eq 0 ]
-	then
-		exiv2 -r':basename:_exif' "${outfile}"
-	fi
-done
-
+	for f in "${blenddir}/"*
+	do
+		infile=$(basename -- "${f}")
+		outfile="${scaledir}/${infile}#w2x.jpg"
+		echo -e "\e[0m »»» Upscaling using waifu2x: \e[1m $infile... \e[2m"
+		waifu2x-ncnn-vulkan -i "$f" -s 2 -f jpg -o "${outfile}"
+		exiv2 rm "${outfile}"
+		exiv2 -ea- "$f" | exiv2 -ia- "${outfile}"
+		if [ $? -eq 0 ]
+		then
+			exiv2 -r':basename:_exif' "${outfile}"
+		fi
+	done
+fi
 
 iEnd=$(date +%s)
 echo -e "\n \e[0m »»» Total processing time: $((iEnd-iStart)) seconds \e[2m"
