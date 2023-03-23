@@ -12,7 +12,7 @@ fi
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v2.4.5"
+scriptv="v2.5.0"
 sYe="\e[93m"
 sNo="\033[1;35m"
 logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
@@ -352,6 +352,35 @@ function preserve_meta {
 	fi
 }
 
+
+function add_border {
+	echo -e "     ADD BORDER (WHITE): "
+	echo -e "     (0) no"
+	echo -e "     (1) yes, 15px"
+	echo -e "     (2) yes, 25px"
+	echo -e ""
+	read -p "      --> " answer_size
+	echo -e ""
+
+	case $answer_size in
+		""|"0")
+			arg6=""
+		;;
+		"1")
+			arg6="-border 15x15 -bordercolor white"
+		;;
+		"2")
+			arg6="-border 25x25 -bordercolor white"
+		;;
+		*)
+			echo "Unknown option, exiting..."
+			exit 3
+		;;
+	esac
+	echo -e "  ----------------arg6[ $arg6 ]  \n" >> $logfile
+}
+
+
 #################### RUN PROGRAM #################################
 echo -e "  =======================================================================================================" > "${logfile}"
 echo -e "  -------------------------------------imgconv.sh $scriptv logfile---------------------------------------\n" >> "${logfile}"
@@ -380,6 +409,8 @@ preserve_meta
 show_banner
 select_resize
 show_banner
+add_border
+show_banner
 
 
 basedir="./imgconv_out"
@@ -406,7 +437,7 @@ do
 	else
 		infile="$f"
 	fi
-	convert "$infile" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg9 -verbose "$outfile" | tee -a "${logfile}"
+	convert "$infile" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg6 $arg9 -verbose "$outfile" | tee -a "${logfile}"
 	rm -f tmp.jpg
 
 	if [[ $include_meta = "1" ]]; then
