@@ -1,0 +1,8 @@
+# add this file to the ~ directory
+# check the path of the local *.nanorc files
+
+include /usr/share/nano/*.nanorc
+set autoindent
+set indicator
+set linenumbers
+set mouse
