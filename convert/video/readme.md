@@ -194,6 +194,21 @@ ffmpeg -f dshow -video_size 640x480  -i video="USB Camera":audio="Microfoon (2- 
 
 ### Linux (v4l2)
 
+(zie ook: https://trac.ffmpeg.org/wiki/Capture/Webcam)
+
+Streams opvragen:
+`v4l2-ctl --list-devices`
+
+Opties V4L2 instellen:
+`v4l2-ctl -L`
+`v4l2-ctl -c <option>=<value>`
+
+Ondersteunde protocollen opvragen:
+`ffmpeg -f v4l2 -list_formats all -i /dev/video0`
+
+Eenvoudig voorbeeld:
+`ffmpeg -f v4l2 -framerate 25 -video_size 640x480 -i /dev/video0 output.mkv`
+
 In Linux lijkt het  lastiger om de streams te synchroniseren, maar met onderstaand commando wordt de gecombineerde stream naar een ander ffmpeg proces gepiped:
 
 ```
