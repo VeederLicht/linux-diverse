@@ -12,7 +12,7 @@ fi
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v1.0"
+scriptv="v1.1"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
@@ -26,10 +26,12 @@ sNo="\033[1;35m"
 for f in "$@"
 do
     ffmpeg -hwaccel cuda \
-    -i ${f} \
-    -filter:v hwupload_cuda,scale_cuda=-2:1440 \
+    -i "$f" \
     -c:v h264_nvenc -coder:v cabac -profile:v high \
     -level:v auto -rc-lookahead:v 32 -refs:v 16 -spatial-aq true \
     -bf:v 3 -b_ref_mode:v middle -qp 26 \
-    ${f}.cuda.mp4 -y
+    "$f".cuda.mp4 -y
 done
+
+
+    #-filter:v hwupload_cuda,scale_cuda=-2:1440 \
