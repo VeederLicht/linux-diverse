@@ -35,3 +35,6 @@ done
 
 
     #-filter:v hwupload_cuda,scale_cuda=-2:1440 \
+
+# working opencl example (ffmpeg complains about invalid output format without the format specifier in the filters)
+# ffmpeg -init_hw_device opencl=gpu -filter_hw_device gpu -i testvideo2.original.m4v -vf "hwupload, nlmeans_opencl, hwdownload, format=yuv420p" opencl.mp4 -y
