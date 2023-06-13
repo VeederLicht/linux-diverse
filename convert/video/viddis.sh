@@ -3,7 +3,7 @@
 clear
 
 # Define constants
-scriptv="v2.7.5-beta"
+scriptv="v2.7.6-beta"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
@@ -38,13 +38,13 @@ function ask_convert_quality {		# ... picture quality
 	clear
 	echo -e "\n\n"
 	echo -e "Convert video to:"
-	echo -e "	[0]	H264 Editing Quality	(m4v, high bitrate)"
-	echo -e "	[1]	H264 Standard Quality	(mp4)"
-	echo -e "	[2]	H264 Low Quality	(mp4)"
-	echo -e "	[3]	AV1 Standard Quality	(mp4)"
-	echo -e "	[4]	AV1 Low Quality		(mp4)"
-	echo -e "	[5]	H264 NVENC Medium	(mp4)"
-	echo -e "	[6]	H265 NVENC Medium	(mp4)"
+	echo -e "	[0]	H264 Editing Quality		(m4v, high bitrate)"
+	echo -e "	[1]	H264 Good Quality		(mp4)"
+	echo -e "	[2]	H264 Low Quality		(mp4)"
+	echo -e "	[3]	AV1 Good Quality		(mp4)"
+	echo -e "	[4]	AV1 Low Quality			(mp4)"
+	echo -e "	[5]	H264 Good Quality (NVENC)	(mp4)"
+	echo -e "	[6]	H265 Good Quality (NVENC)	(mp4)"
 	read -p "Your selection: " answer1
 
 	case $answer1 in
@@ -55,8 +55,8 @@ function ask_convert_quality {		# ... picture quality
 			o_fl="-movflags frag_keyframe+empty_moov"
 			;;
 		"1")
-			selection+="   -H264 Standard Quality \n"
-			outvid="-c:v libx264 -preset:v slow -profile:v high -crf 27 -c:a aac -b:a 256k"
+			selection+="   -H264 Good Quality \n"
+			outvid="-c:v libx264 -preset:v slow -profile:v high -crf 26 -c:a aac -b:a 256k"
 			outext="h264.mp4"
 			o_fl="-movflags +faststart"
 			;;
@@ -67,7 +67,7 @@ function ask_convert_quality {		# ... picture quality
 			o_fl="-movflags +faststart"
 			;;
 		"3")
-			selection+="   -AV1 Standard Quality \n"
+			selection+="   -AV1 Good Quality \n"
 			outvid="-c:v libsvtav1 -b:v 0 -qp 32 -preset 7 -c:a libopus -b:a 96k"
 			outext="av1.mp4"
 			o_fl=""
@@ -79,13 +79,13 @@ function ask_convert_quality {		# ... picture quality
 			o_fl=""
 			;;
 		"5")
-			selection+="   -H264 NVENC Standard Quality \n"
+			selection+="   -H264 Good Quality (NVENC)\n"
 			outvid="-gpu 0 -c:v h264_nvenc -preset slow -profile:v high -cq 25 -c:a aac -b:a 192k"
 			outext="h264.mp4"
 			o_fl="-movflags +faststart"
 			;;
 		"6")
-			selection+="   -H265 NVENC Standard Quality \n"
+			selection+="   -H265 Good Quality (NVENC)\n"
 			outvid="-gpu 0 -c:v hevc_nvenc -preset slow -tier high -cq 27 -c:a aac -b:a 192k"
 			outext="h265.mp4"
 			o_fl="-movflags +faststart"
@@ -501,7 +501,9 @@ function ask_length {			# ... select length
 		echo -e "\n\n\n+++++++++++++++++SOURCE FILE INFO:\n" >> "${logfile}"
 			ffprobe -i "${f}" -hide_banner -loglevel fatal -show_error -show_format -show_streams -show_programs -show_chapters -show_private_data -print_format flat  >> "${logfile}"
 		echo -e "\n\n\n++++++++++++++++++++++++++RUNNING:\n\n" | tee -a "${logfile}"
-		time ffmpeg -hide_banner $o_ln -i "$f" -map 0 -vf "${f_db}${f_di}${f_ss}${f_ar}${f_fr}${f_sh}setsar=sar=1/1,format=yuv420p" $o_fl $outvid -map_metadata 0 -metadata comment="${m_comment}" ${f_cr} -c:s copy "${outfile}" -y &>> "${logfile}"
+#		time ffmpeg -hide_banner $o_ln -i "$f" -map 0 -vf "${f_db}${f_di}${f_ss}${f_ar}${f_fr}${f_sh}setsar=sar=1/1,format=yuv420p" $o_fl $outvid -map_metadata 0 -metadata comment="${m_comment}" ${f_cr} -c:s copy "${outfile}" -y &>> "${logfile}"
+		time ffmpeg -hide_banner $o_ln -i "$f" -vf "${f_db}${f_di}${f_ss}${f_ar}${f_fr}${f_sh}setsar=sar=1/1,format=yuv420p" $o_fl $outvid -map_metadata 0 -metadata comment="${m_comment}" ${f_cr} "${outfile}" -y &>> "${logfile}"
+		#-c:s copy
 			if [ ! -z "$f_st" ]; then
 				ffmpeg -hide_banner -i "${outfile}" -vf vidstabdetect=shakiness=4:accuracy=15:result="transforms.trf" dummy.mp4 -y &>> "${logfile}"
 				ffmpeg -hide_banner -i "${outfile}" -vf vidstabtransform $o_fl $outvid -map_metadata 0 "${outbase}_stab.${outext}" -y &>> "${logfile}"
@@ -555,7 +557,7 @@ function ask_length {			# ... select length
 			outfile=${out_i}/${f}_%05d.${outext}
 			echo $outfile
 			ffmpeg -y -hide_banner -i ${f} -vf "${f_db}${f_di}${f_ss}${f_ar}${f_fr}${f_sh}setsar=sar=1/1,format=yuv420p" ${f_img} ${outfile} | tee "${logfile}"
-			
+
 			# .................... subtitles
 			# NOG TOEVOEGEN!!
 
