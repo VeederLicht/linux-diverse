@@ -5,29 +5,40 @@
 if [[ $# -eq 0 ]]	# Test nr. of arguments
   then
     echo "        No source files specified."
-	exit 2
+	exit 1
 fi
 
+if ! command -v exiftool -ver &>/dev/null; then
+    echo "      ERROR: This script relies on the program 'exiftool' (perl-image-exiftool). It could not be found, exiting..."
+    exit 2
+fi
+
+if ! command -v exiv2 --version &>/dev/null; then
+    echo "      ERROR: This script relies on the program 'exiv2'. It could not be found, exiting..."
+    exit 2
+fi
 
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v2.6.0"
+scriptv="v2.8.0"
 sYe="\e[93m"
 sNo="\033[1;35m"
-logfile=$(date +%Y%m%d_%H.%M_)"imgconv.rep"
+basedir="./imgconv_"$(date "+%Y%m%d%H%S")
+mkdir -p "${basedir}"
+logfile="${basedir}"/$(date +%Y%m%d_%H.%M_)"imgconv.rep"
 
 # User information to inject in metadata
 m_composer=''
 m_copyright=''
-m_comment='Converted with imgconv.sh (RickOrchard@Github)'
+m_comment='Converted with imgconv.sh (VeederLicht@Github)'
 
 
 function show_banner {
 	clear
 	echo -e "\n ${sNo}"
 	echo -e "  ===========================================IMGCONV================================================="
-	echo -e "                Batch convert images using EXIF-data, RickOrchard 2023, no copyright"
+	echo -e "                Batch convert images using EXIF-data, VeederLicht 2023, no copyright"
 	echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 	echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 }
@@ -35,7 +46,7 @@ function show_banner {
 function select_output {
 	echo -e "\n"
 	echo -e "      SELECT OUTPUT FORMAT: "
-	echo -e "     (1) Convert to AVIF (av1, no support for metadata)"
+	echo -e "     (1) Convert to AVIF"
 	echo -e "     (2) Convert to WEBP"
 	echo -e "     (3) Convert to HEIC"
 	echo -e "     (4) Convert to PNG"
@@ -73,8 +84,8 @@ function select_output {
 			arg0="webp"
 			case $answer_quality in
 				"1")
-					arg9="-define webp:preset=photo -quality 50"
-					append="q50"
+					arg9="-define webp:preset=photo -quality 45"
+					append="q45"
 				;;
 				"2")
 					arg9="-define webp:preset=photo -quality 80"
@@ -124,8 +135,8 @@ function select_output {
 			arg0="jpg"
 			case $answer_quality in
 				"1")
-					arg9="-quality 60"
-					append="q60"
+					arg9="-quality 55"
+					append="q55"
 				;;
 				"2")
 					arg9="-quality 80"
@@ -181,7 +192,7 @@ function append_text {
 			append=""
 		;;
 		"1")
-			append="__{${append}}"
+			append="--{${append}}"
 		;;
 		*)
 			echo "Unknown option, exiting..."
@@ -395,15 +406,17 @@ function select_waifu2x {
 }
 
 function preserve_meta {
-	echo -e "      Copy METADATA?"
-	echo -e "     (1) yes"
-	echo -e "     (2) no, erase all tags"
+	echo -e "      RETAIN FILE DATE AND METADATA?"
+	echo -e "     (0) yes"
+	echo -e "     (1) no, erase all tags"
 	echo -e ""
-	read -p "      --> " include_meta
+	read -p "      --> " retain_meta
 	echo -e ""
 
-	if [[ $include_meta = "1" ]]; then
-		echo -e "  ----------------Including metadata \n" >> $logfile
+
+	if [[ $retain_meta = "0" ]] || [[ $retain_meta = "" ]]; then
+		retain_meta=0
+		echo -e "  ----------------Retaining file date and metadata \n" >> $logfile
 	fi
 }
 
@@ -468,10 +481,6 @@ show_banner
 append_text
 show_banner
 
-
-basedir="./imgconv_"$(date "+%Y%m%d%H%S")
-#rm -Rf "${basedir}"
-mkdir -p "${basedir}"
 fCount=0
 
 for f in "$@"
@@ -482,29 +491,33 @@ do
 	camMake=$(exiv2 -Pv -K Exif.Image.Make "${f}" | sed 's/://g' | sed 's/ /_/g')
 	camModel=$(exiv2 -Pv -K Exif.Image.Model "${f}"| sed 's/://g' | sed 's/ /_/g')
 	fileName="${f%.*}"
-	if [[ $prepend = true ]]; then
-		outfile="${basedir}/${makeDate}»${camMake}_${camModel}-${fileName}${append}.${arg0}"
-		if [[ ${makeDate} = "" ]]; then
-			outfile="${basedir}/${fileName}${append}.${arg0}"
-		fi
+
+	if [[ $prepend -eq true ]] && [[ $makeDate != "" ]]; then
+		outfile="${basedir}/${makeDate}#${camMake}_${camModel}${append}.${arg0}"
+		#if [[ ${makeDate} = "" ]]; then
+		#	outfile="${basedir}/${fileName}${append}.${arg0}"
+		#fi
 	else
 		outfile="${basedir}/${fileName}${append}.${arg0}"
 	fi
 	echo -e ".\n.\n.\n." >> $logfile
 	if [[ $arg5 -gt 0 ]]; then
-		waifu2x-ncnn-vulkan -i "$f" -o tmp.jpg -s $arg5
-		infile="tmp.jpg"
+		waifu2x-ncnn-vulkan -i "$f" -o tmp.png -s $arg5
+		infile="tmp.png"
 	else
 		infile="$f"
 	fi
+	
 	convert "$infile" -auto-orient $arg1 $arg3 $arg4 $arg2 $arg6 $arg9 -verbose "$outfile" | tee -a "${logfile}"
-	rm -f tmp.jpg
+	rm -f tmp.png
 
-	if [[ $include_meta = "1" ]]; then
-		exiv2 -ea- "$f" | exiv2 -ia- "$outfile" &>> $logfile
+	if [[ $retain_meta -eq 0 ]]; then
+		exiftool -tagsfromfile "$f" "$outfile" | tee -a "${logfile}"
+#voor de zekerheid ook touch
 		touch -r "$f" "${outfile}"
+		exiftool "-FileCreateDate<CreateDate" "-FileModifyDate<CreateDate" "$outfile"
 	else
-		exiv2 -d a "$outfile" &>> $logfile
+		exiv2 -d a "$outfile" | tee -a "${logfile}"
 	fi
 done
 
