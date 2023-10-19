@@ -3,14 +3,14 @@
 clear
 
 # Define constants
-scriptv="v2.7.6-beta"
+scriptv="v2.7.6"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ========================================================VIDDIS==========================================================="
-echo -e "	 A video conversion and dissection batch script using ffmpeg, RickOrchard 2020, no copyright"
+echo -e "	 A video conversion and dissection batch script using ffmpeg, copyleft 2023 (veederlicht@github)"
 echo -e "       -----------------------------------------------${sYe} $scriptv ${sNo}-------------------------------------------------"
 
 
