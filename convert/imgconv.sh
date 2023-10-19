@@ -21,7 +21,7 @@ fi
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v2.8.0"
+scriptv="v2.8.5"
 sYe="\e[93m"
 sNo="\033[1;35m"
 basedir="./imgconv_"$(date "+%Y%m%d%H%S")
@@ -29,16 +29,14 @@ mkdir -p "${basedir}"
 logfile="${basedir}"/$(date +%Y%m%d_%H.%M_)"imgconv.rep"
 
 # User information to inject in metadata
-m_composer=''
-m_copyright=''
-m_comment='Converted with imgconv.sh (VeederLicht@Github)'
+m_comment='Converted with imgconv.sh (veederlicht@github)'
 
 
 function show_banner {
 	clear
 	echo -e "\n ${sNo}"
 	echo -e "  ===========================================IMGCONV================================================="
-	echo -e "                Batch convert images using EXIF-data, VeederLicht 2023, no copyright"
+	echo -e "                Batch convert images using EXIF-data, Copyleft 2023 VeederLicht"
 	echo -e "  --------------------------------------------${sYe} $scriptv ${sNo}----------------------------------------------------"
 	echo -e "\n ${sYe}  NOTE: metadata will be injected, to change it edit this scriptheader!  ${sNo} \n\n"
 }
@@ -512,7 +510,7 @@ do
 	rm -f tmp.png
 
 	if [[ $retain_meta -eq 0 ]]; then
-		exiftool -tagsfromfile "$f" "$outfile" | tee -a "${logfile}"
+		exiftool -Comment=$m_comment -tagsfromfile "$f" "$outfile" | tee -a "${logfile}"
 #voor de zekerheid ook touch
 		touch -r "$f" "${outfile}"
 		exiftool "-FileCreateDate<CreateDate" "-FileModifyDate<CreateDate" "$outfile"
