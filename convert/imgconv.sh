@@ -21,7 +21,7 @@ fi
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v2.8.5"
+scriptv="v2.8.9"
 sYe="\e[93m"
 sNo="\033[1;35m"
 basedir="./imgconv_"$(date "+%Y%m%d%H%S")
@@ -422,8 +422,8 @@ function preserve_meta {
 function add_border {
 	echo -e "     ADD BORDER (WHITE): "
 	echo -e "     (0) no"
-	echo -e "     (1) yes, 15px"
-	echo -e "     (2) yes, 25px"
+	echo -e "     (1) yes, 10px"
+	echo -e "     (2) yes, 20px"
 	echo -e ""
 	read -p "      --> " answer_size
 	echo -e ""
@@ -433,10 +433,10 @@ function add_border {
 			arg6=""
 		;;
 		"1")
-			arg6="-border 15x15 -bordercolor white"
+			arg6="-border 10x10 -bordercolor white"
 		;;
 		"2")
-			arg6="-border 25x25 -bordercolor white"
+			arg6="-border 20x20 -bordercolor white"
 		;;
 		*)
 			echo "Unknown option, exiting..."
