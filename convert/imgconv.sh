@@ -21,7 +21,7 @@ fi
 
 ####################  INITIALISATION & DEFINITIONS  ############################
 # Define constants
-scriptv="v2.8.9"
+scriptv="v2.9.0"
 sYe="\e[93m"
 sNo="\033[1;35m"
 basedir="./imgconv_"$(date "+%Y%m%d%H%S")
@@ -510,7 +510,7 @@ do
 	rm -f tmp.png
 
 	if [[ $retain_meta -eq 0 ]]; then
-		exiftool -Comment=$m_comment -tagsfromfile "$f" "$outfile" | tee -a "${logfile}"
+		exiftool -Comment="${m_comment}" -tagsfromfile "$f" "$outfile" | tee -a "${logfile}"
 #voor de zekerheid ook touch
 		touch -r "$f" "${outfile}"
 		exiftool "-FileCreateDate<CreateDate" "-FileModifyDate<CreateDate" "$outfile"
