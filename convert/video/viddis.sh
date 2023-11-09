@@ -3,14 +3,14 @@
 clear
 
 # Define constants
-scriptv="v2.7.6"
+scriptv="v2.8.0-beta"
 sYe="\e[93m"
 sNo="\033[1;35m"
 
 # Show banner
 echo -e "\n ${sNo}"
 echo -e "  ========================================================VIDDIS==========================================================="
-echo -e "	 A video conversion and dissection batch script using ffmpeg, copyleft 2023 (veederlicht@github)"
+echo -e "	 A video conversion and dissection batch script using ffmpeg, RickOrchard 2020, no copyright"
 echo -e "       -----------------------------------------------${sYe} $scriptv ${sNo}-------------------------------------------------"
 
 
@@ -156,15 +156,16 @@ function ask_aspect_ratio { 		# ... aspect ratio
 	echo -e "\n\n"
 	echo -e "Current pixel resolution and display aspect ratio are:${sYe}"
 	ffprobe -i "$1" -v fatal -select_streams v:0 -show_entries stream=height,width,sample_aspect_ratio,display_aspect_ratio -of csv=s=,:p=0:nk=0
-	echo -e "${sNo}Force (stretched) aspect ratio for the output video:"
-	echo -e "	[0] no	(pixel-AR may not equal display-AR)"
-	echo -e "	[1] 4:3	(old TV)"
-	echo -e "	[2] 11:8   (8mm film)"
-	echo -e "	[3] 3:2	(Super8 film)"
-	echo -e "	[4] 16:9   (HD)"
-	echo -e "	[5] 18:9   (Univisium)"
-	echo -e "	[6] HD fixed resolution   (720p)"
-	echo -e "	[7] FHD fixed resolution (1080p)"
+	echo -e "${sNo}Stretch / Resize video:"
+	echo -e "	[0] none		(pixel-AR may not equal display-AR)"
+	echo -e "	[1] stretch 4:3			(old TV)"
+	echo -e "	[2] stretch 11:8		(8mm film)"
+	echo -e "	[3] stretch 3:2			(Super8 film)"
+	echo -e "	[4] stretch 16:9		(HD)"
+	echo -e "	[5] stretch 18:9		(Univisium)"
+	echo -e "	[6] Resize 270p			(no aspect change)"
+	echo -e "	[7] Resize 540p			(no aspect change)"
+	echo -e "	[8] fixed 1080p 16:9	(HD)"
 	echo -e ""
 	read -p "Your selection: " answer1
 
@@ -173,25 +174,28 @@ function ask_aspect_ratio { 		# ... aspect ratio
 		f_ar=""
 		;;
 	  1)
-		f_ar="scale=ih*(4/3):ih:sws_flags=lanczos,"
+		f_ar="scale=ih*(4/3):ih,"
 		;;
 	  2)
-		f_ar="scale=ih*(11/8):ih:sws_flags=lanczos,"
+		f_ar="scale=ih*(11/8):ih,"
 		;;
 	  3)
-		f_ar="scale=ih*(3/2):ih:sws_flags=lanczos,"
+		f_ar="scale=ih*(3/2):ih,"
 		;;
 	  4)
-		f_ar="scale=ih*(16/9):ih:sws_flags=lanczos,"
+		f_ar="scale=ih*(16/9):ih,"
 		;;
 	  5)
-		f_ar="scale=ih*(18/9):ih:sws_flags=lanczos,"
+		f_ar="scale=ih*(18/9):ih,"
 		;;
 	  6)
-		f_ar="scale=1280:720:sws_flags=lanczos,"
+		f_ar="scale=-2:270,"
 		;;
 	  7)
-		f_ar="scale=1920:1080:sws_flags=lanczos,"
+		f_ar="scale=-2:540,"
+		;;
+	  8)
+		f_ar="scale=1920:1080,"
 		;;
 	  *)
 		echo "Invalid answer, exiting..."
