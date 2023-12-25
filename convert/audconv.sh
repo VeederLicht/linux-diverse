@@ -6,7 +6,7 @@ m_encoded_by='Converted with audconv.sh (veederlicht@github)'
 m_comment=''
 
 # Define constants
-scriptv="v1.5.0"
+scriptv="v1.7.0"
 sYe="\e[93m"
 sNo="\033[1;35m"
 outdir=./$(date +%Y%m%d_%H.%M_)audconv
@@ -125,8 +125,8 @@ case $answer_format in
 		;;
 
 	2)
-		arg0b="[160k-"
-		arg1="-c:a aac -b:a 160k"
+		arg0b="[192k-"
+		arg1="-c:a aac -b:a 192k"
 		;;
 	esac
 	arg0a="m4a"
@@ -146,8 +146,8 @@ case $answer_format in
 		;;
 
 	2)
-		arg0b="[192k-"
-		arg1="-c:a libmp3lame -b:a 192k -compression_level 0"
+		arg0b="[256k-"
+		arg1="-c:a libmp3lame -b:a 256k -compression_level 0"
 		;;
 
 	esac
@@ -187,26 +187,12 @@ echo -e "  -----------------Convert to [ $arg0a ] with [ $arg1 ] \n" >> $logfile
 #     echo -e "  ----------------[ $arg2 ] \n" >> $logfile
 
 
-# ... AUDIO FILTERS
-# ... select normalization .........................................................................................
-echo -e "  APPLY LOUDNESS NORMALIZATION? (EBU_R128)"
-echo -e "     (0) no"
-echo -e "     (1) yes"
-echo -e ""
-read -p "      --> " answer_loudnorm
-echo -e ""
 
-case $answer_loudnorm in
-"")
-	answer_loudnorm=0
-	;;
-0 | 1) ;;
-*)
-	echo "Unknown option, exiting..."
-	exit 3
-	;;
-esac
-echo -e "  -----------------Apply loudness normalization: $answer_loudnorm \n" >>$logfile
+
+# ... AUDIO FILTERS
+
+
+
 # ... compose filter-string.........................................................................................
 afilt=""
 function addcomma {
@@ -214,6 +200,8 @@ function addcomma {
 		afilt=,$afilt
 	fi
 }
+
+
 # ... select noise reduction.........................................................................................
 echo -e "  SELECT NOISE SUPPRESSION "
 echo -e "   (0) none"
@@ -236,6 +224,7 @@ case $answer_noise in
 	exit 3
 	;;
 esac
+
 # ... select frequencies.........................................................................................
 echo -e "  SELECT FREQUENCY CUTOUT:"
 echo -e "   (0) none"
@@ -265,6 +254,7 @@ case $answer_noise in
 	exit 3
 	;;
 esac
+
 # ... select crystalizer .........................................................................................
 echo -e "  ENHANCE AUDIO CLARITY?"
 echo -e "     (0) no"
@@ -285,7 +275,66 @@ case $answer_crystalizer in
 	;;
 esac
 
-echo -e "  ----------------Filter string: $afilt \n" >>$logfile
+# ... select extra bass .........................................................................................
+echo -e "  ADD BASS?"
+echo -e "     (0) no"
+echo -e "     (1) yes"
+echo -e ""
+read -p "      --> " answer_bass
+echo -e ""
+
+case $answer_bass in
+"" | 0) ;;
+1)
+	addcomma
+	afilt=$afilt",bass=gain=7"
+	;;
+*)
+	echo "Unknown option, exiting..."
+	exit 3
+	;;
+esac
+
+# ... select extrastereo .........................................................................................
+echo -e "  ENHANCE STEREO EFFECT?"
+echo -e "     (0) no"
+echo -e "     (1) yes"
+echo -e ""
+read -p "      --> " answer_stereo
+echo -e ""
+
+case $answer_stereo in
+"" | 0) ;;
+1)
+	addcomma
+	afilt=$afilt",extrastereo"
+	;;
+*)
+	echo "Unknown option, exiting..."
+	exit 3
+	;;
+esac
+
+# ... select normalization .........................................................................................
+echo -e "  APPLY LOUDNESS NORMALIZATION? (EBU_R128) [cpu-intensive, may distort audio]"
+echo -e "     (0) no"
+echo -e "     (1) yes"
+echo -e ""
+read -p "      --> " answer_loudnorm
+echo -e ""
+
+case $answer_loudnorm in
+"")
+	answer_loudnorm=0
+	;;
+0 | 1) ;;
+*)
+	echo "Unknown option, exiting..."
+	exit 3
+	;;
+esac
+echo -e "  -----------------Apply loudness normalization: $answer_loudnorm \n" >>$logfile
+
 
 # ... select length.........................................................................................
 echo -e "  SELECT LENGTH: "
