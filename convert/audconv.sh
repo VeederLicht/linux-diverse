@@ -6,7 +6,7 @@ m_encoded_by='Converted with audconv.sh (veederlicht@github)'
 m_comment=''
 
 # Define constants
-scriptv="v1.7.0"
+scriptv="v1.7.1"
 sYe="\e[93m"
 sNo="\033[1;35m"
 outdir=./$(date +%Y%m%d_%H.%M_)audconv
@@ -196,9 +196,7 @@ echo -e "  -----------------Convert to [ $arg0a ] with [ $arg1 ] \n" >> $logfile
 # ... compose filter-string.........................................................................................
 afilt=""
 function addcomma {
-	if [[ -n "$afilt" ]]; then
-		afilt=,$afilt
-	fi
+	[[ ! -z "$afilt" ]] && afilt=$afilt,
 }
 
 
@@ -239,15 +237,15 @@ case $answer_noise in
 "" | 0) ;;
 1)
 	addcomma
-	afilt="highpass=f=200"$afilt
+	afilt=$afilt"highpass=f=200"
 	;;
 2)
 	addcomma
-	afilt="lowpass=f=3500"$afilt
+	afilt=$afilt"lowpass=f=3500"
 	;;
 3)
 	addcomma
-	afilt="highpass=f=150,lowpass=f=3500"$afilt
+	afilt=$afilt"highpass=f=150,lowpass=f=3500"
 	;;
 *)
 	echo "Unknown option, exiting..."
@@ -267,7 +265,7 @@ case $answer_crystalizer in
 "" | 0) ;;
 1)
 	addcomma
-	afilt=$afilt",crystalizer"
+	afilt=$afilt"crystalizer"
 	;;
 *)
 	echo "Unknown option, exiting..."
@@ -276,7 +274,7 @@ case $answer_crystalizer in
 esac
 
 # ... select extra bass .........................................................................................
-echo -e "  ADD BASS?"
+echo -e "  BASSBOOST?"
 echo -e "     (0) no"
 echo -e "     (1) yes"
 echo -e ""
@@ -287,7 +285,7 @@ case $answer_bass in
 "" | 0) ;;
 1)
 	addcomma
-	afilt=$afilt",bass=gain=7"
+	afilt=$afilt"bass=gain=5"
 	;;
 *)
 	echo "Unknown option, exiting..."
@@ -307,7 +305,7 @@ case $answer_stereo in
 "" | 0) ;;
 1)
 	addcomma
-	afilt=$afilt",extrastereo"
+	afilt=$afilt"extrastereo"
 	;;
 *)
 	echo "Unknown option, exiting..."
