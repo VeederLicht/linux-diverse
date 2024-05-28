@@ -11,6 +11,8 @@
     . alacritty (terminal emulator (GPU))
     . ranger   (file manager)
     . btop  (htop alternative)
+    . glances (htop alternative)
+    . iptraf-ng (network monitoring)
     . gdu   (disk usage, 'baobab')
     . ncdu   (disk usage, 'baobab')
     . lsd   (super-ls)
